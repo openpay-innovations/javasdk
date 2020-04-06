@@ -38,7 +38,7 @@ To install the API client library to your local Maven repository, simply execute
 4. To update test data , check positive and negative data in folder /testData and update files accordingly.
 5. Correct Order id in file testOrderPositive.txt will be written automatically on successful call of ordersPostTestPositive().
 6. Redirection to URL will be automatically done on payment website and will automatically close after two minutes. We can configure this time in merchantConfig.ini file with property chromeDriverRedirectTimeout (add time in milisec)
-7. We can change redirectURL value from merchantConfig.ini as well.
+7. We can change redirectURL value from mappingApiConfig.ini as well.
 
 ###Generate Test Report
 
@@ -70,3 +70,5 @@ Add this dependency to your project's POM for SDK integration (for maven based p
 3. Test data can be changed from files available in /testData. For each API we have one positive test case and one negative test case. For capture payment and get orders we will get order id from test order.
 
 4. For positive test 'testOrderPositive.txt' file will be automatically written with order id during successful create new order api call.
+
+5. Retry count for api is currently set to 3 in mappingApiConfig.ini with property as retryCount.

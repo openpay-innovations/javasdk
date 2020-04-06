@@ -18,6 +18,8 @@ import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.util.Util;
 import com.plugint.client.ApiException;
 
+import junit.framework.Assert;
+
 /**
  * API tests for SDK
  */
@@ -40,7 +42,9 @@ public class PlugintSDKPositiveTest {
 
 		Map<String, Object> response;
 		try {
-			response = sdk.getPSPConfig(3);
+			String maxRetry = Helper.loadPropertyValue(Helper.loadApiConfigFile(),PlugintConstants.APIRETRYVALUE , PlugintConstants.APIRETRYSECTION);
+			assertNotNull("Max retry config value cannot be null",maxRetry);
+			response = sdk.getPSPConfig(Integer.parseInt(maxRetry));
 			assertNotNull("Response for get Limit api cannot be null", response);
 			assertNotNull(response.get("minPrice"));
 			assertNotNull(response.get("maxPrice"));
@@ -70,7 +74,9 @@ public class PlugintSDKPositiveTest {
 			String createNewOrderJsonStr = Helper.readJson("testData/getTokenPositive.json");
 			body = Util.convertStringToMap(createNewOrderJsonStr);
 			assertNotNull("Converted request map cannot be null", body);
-			Map<String, Object> response = sdk.getToken(body, 3);
+			String maxRetry = Helper.loadPropertyValue(Helper.loadApiConfigFile(),PlugintConstants.APIRETRYVALUE , PlugintConstants.APIRETRYSECTION);
+			assertNotNull("Max retry config value cannot be null",maxRetry);
+			Map<String, Object> response = sdk.getToken(body, Integer.parseInt(maxRetry));
 			assertNotNull("Response map for create new order cannot be null", response);
 			String transactionToken = Helper.getTransactionTokenTest(response);
 			String redirecturl = Helper.loadPropertyValue(configFileName, PlugintConstants.REDIRECTURL,
@@ -81,9 +87,9 @@ public class PlugintSDKPositiveTest {
 			Helper.usingBufferedWritter("testData/testOrderPositive.txt", orderId);
 			logger.info(response);
 			logger.info("Capturing payment");
-			ordersOrderIdCapturePostTestPositive();
-			ordersOrderIdGetTestPositive();
-			ordersOrderIdRefundPostTestPositive();
+			ordersOrderIdCapturePostTestPositive(Integer.parseInt(maxRetry));
+			ordersOrderIdGetTestPositive(Integer.parseInt(maxRetry));
+			ordersOrderIdRefundPostTestPositive(Integer.parseInt(maxRetry));
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			logger.error(e);
@@ -97,12 +103,13 @@ public class PlugintSDKPositiveTest {
 	 *
 	 * @throws ApiException if the Api call fails
 	 */
-	public void ordersOrderIdCapturePostTestPositive() {
+	public void ordersOrderIdCapturePostTestPositive(int maxRetry) {
 		try {
+			assertNotNull("max retry count cannot be null",maxRetry);
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			assertNotNull("Order Id cannot be null", orderId);
 			Map<String, Object> response;
-			response = sdk.capturePayment(orderId, 3);
+			response = sdk.capturePayment(orderId, maxRetry);
 			assertNotNull("Response map for create new order cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {
@@ -118,12 +125,13 @@ public class PlugintSDKPositiveTest {
 	 *
 	 * @throws ApiException if the Api call fails
 	 */
-	public void ordersOrderIdGetTestPositive() {
+	public void ordersOrderIdGetTestPositive(int maxRetry) {
 		try {
+			assertNotNull("max retry count cannot be null",maxRetry);
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			assertNotNull("Order Id cannot be null", orderId);
 			Map<String, Object> response;
-			response = sdk.updateShopOrder(orderId, 3);
+			response = sdk.updateShopOrder(orderId, maxRetry);
 			assertNotNull("Response map for get orders cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {
@@ -139,14 +147,15 @@ public class PlugintSDKPositiveTest {
 	 *
 	 * @throws Exception if the Api call fails
 	 */
-	public void ordersOrderIdRefundPostTestPositive() {
+	public void ordersOrderIdRefundPostTestPositive(int maxRetry) {
 		try {
+			assertNotNull("max retry count cannot be null",maxRetry);
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			String requestJson = Helper.readJson("testData/getRefundPositive.json");
 			assertNotNull("Request body for refund cannot be null", Util.convertStringToMap(requestJson));
 			assertNotNull("Order id for refund cannot be null", orderId);
 			Map<String, Object> response;
-			response = sdk.refund(Util.convertStringToMap(requestJson), orderId, 3);
+			response = sdk.refund(Util.convertStringToMap(requestJson), orderId, maxRetry);
 			assertNotNull("Response map for refund cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {
