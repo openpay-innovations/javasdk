@@ -17,7 +17,7 @@
    },
    "totalPrice":{
       "currencyIso":"USD",
-      "value":2522.87,
+      "value":10000,
       "priceType":"BUY",
       "formattedValue":"$2,522.87",
       "minQuantity":null,

@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 import com.plugint.businessLayer.constant.PlugintConstants;
 import com.plugint.businessLayer.core.ControllerIni;
+import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.core.PlugintSDK;
 
 /*
@@ -22,7 +23,7 @@ public class Limits {
 	 */
 	public static Object getLimits(Class<?> sdkClass) throws Exception
 	{
-		String declaredMethod = ControllerIni.loadPropertyValue(ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE),
+		String declaredMethod = Helper.loadPropertyValue(Helper.loadApiConfigFile(),
 				PlugintConstants.LIMIT_METHOD, PlugintConstants.METHODS);
 		Method limitMethod = sdkClass.getDeclaredMethod(declaredMethod);
 		return limitMethod.invoke(sdkClass.newInstance());

@@ -56,7 +56,7 @@ import com.plugint.client.auth.OAuth;
 
 public class ApiClient {
 
-	private Wini configFile = Helper.loadConfigFile();
+	private Wini configFile = Helper.loadApiConfigFile();
     private String basePath = Helper.loadPropertyValue(configFile, PlugintConstants.ENDPOINTURL, PlugintConstants.ENDPOINTSECTION);
     private boolean debugging = false;
     private Map<String, String> defaultHeaderMap = new HashMap<String, String>();

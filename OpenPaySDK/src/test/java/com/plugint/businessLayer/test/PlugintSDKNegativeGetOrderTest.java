@@ -6,6 +6,8 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import com.plugint.businessLayer.constant.PlugintConstants;
 import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.core.PlugintSDK;
 import com.plugint.client.ApiException;
@@ -18,7 +20,7 @@ public class PlugintSDKNegativeGetOrderTest {
 
 	private static final Logger logger = Logger.getLogger(PlugintSDKNegativeGetOrderTest.class);
 	private final PlugintSDK sdk = new PlugintSDK();
-	
+
 	/**
 	 * Gets an order by order id.
 	 *
@@ -31,7 +33,9 @@ public class PlugintSDKNegativeGetOrderTest {
 		try {
 			String orderId = Helper.readText("testData/testOrderNegative.txt");
 			Map<String, Object> response;
-			response = sdk.updateShopOrder(orderId);
+			String maxRetry = Helper.loadPropertyValue(Helper.loadApiConfigFile(),PlugintConstants.APIRETRYVALUE , PlugintConstants.APIRETRYSECTION);
+			assertNotNull("Max retry config value cannot be null",maxRetry);
+			response = sdk.updateShopOrder(orderId, Integer.parseInt(maxRetry));
 			assertNotNull("Response map for get orders cannot be null", response);
 			logger.info("Response with error body due to wrong test data" + response);
 		} catch (Exception e) {

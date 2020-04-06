@@ -35,7 +35,7 @@ public class Tokenisation {
 	 */
 	public static Map<String, Object> createBody(Map<String, Object> jsonMap) throws IOException, ParseException {
 		Helper.isNotNull(jsonMap);
-		Wini apiFile = ControllerIni.loadPropertyFile(PlugintConstants.MAPPING_API_FILE);
+		Wini apiFile = Helper.loadApiConfigFile();
 		Section tokenisationList = ControllerIni.loadProperties(apiFile, "createOrder");
 		Set<String> tokenisationSet = tokenisationList.keySet();
 		Iterator<String> iterateTokenisationSet = tokenisationSet.iterator();
@@ -50,7 +50,7 @@ public class Tokenisation {
 		if (bodyMap.isEmpty()) {
 			return null;
 		}
-		logger.debug("Request map created for tokenisation is" + bodyMap);
+		logger.info("Request map created for tokenisation is" + bodyMap);
 		return bodyMap;
 	}
 
@@ -63,11 +63,11 @@ public class Tokenisation {
 	 */
 	public static Object sendTokenisationRequest(Class<?> sdkClass, Map<String, Object> bodyMap) throws Exception {
 		Helper.isNotNull(bodyMap);
-		Wini configFile = ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
-		String sdkClassString = ControllerIni.loadPropertyValue(configFile, PlugintConstants.TOKEN_REQUEST_MODEL,
+		Wini configFile = Helper.loadApiConfigFile();
+		String sdkClassString = Helper.loadPropertyValue(configFile, PlugintConstants.TOKEN_REQUEST_MODEL,
 				PlugintConstants.API_MODELS);
 		Class<?> requestBodyClass = Class.forName(sdkClassString);
-		String declaredMethodString = ControllerIni.loadPropertyValue(configFile, PlugintConstants.TOKENISATION_METHOD,
+		String declaredMethodString = Helper.loadPropertyValue(configFile, PlugintConstants.TOKENISATION_METHOD,
 				PlugintConstants.METHODS);
 		Method tokenMethod = sdkClass.getDeclaredMethod(declaredMethodString, requestBodyClass);
 		if (bodyMap.isEmpty()) {

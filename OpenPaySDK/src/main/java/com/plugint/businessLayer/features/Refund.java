@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.ini4j.Wini;
 import org.ini4j.Profile.Section;
 import org.json.simple.parser.ParseException;
 
@@ -35,7 +36,7 @@ public class Refund {
 	public static Map<String, Object> createBody(Map<String, Object> jsonMap) throws IOException, ParseException {
 		Helper.isNotNull(jsonMap);
 		Section refundList = ControllerIni
-				.loadProperties(ControllerIni.loadPropertyFile(PlugintConstants.MAPPING_API_FILE), "Refund");
+				.loadProperties(Helper.loadApiConfigFile(), "Refund");
 		Helper.isNotNull(refundList);
 		Set<String> refundSet = refundList.keySet();
 		Helper.isNotNull(refundSet);
@@ -54,7 +55,7 @@ public class Refund {
 		if (bodyMap.isEmpty()) {
 			return null;
 		}
-		logger.debug("request map created for refund is" + bodyMap.toString());
+		logger.info("request map created for refund is" + bodyMap.toString());
 		return bodyMap;
 	}
 
@@ -69,8 +70,9 @@ public class Refund {
 			throws Exception {
 		Helper.isNotNull(bodyMap);
 		Helper.isNotNull(orderId);
-		String requestParameterName = ControllerIni.loadPropertyValue(
-				ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE), PlugintConstants.REFUND_PARAMETER,
+		Wini configFile = Helper.loadApiConfigFile();
+		String requestParameterName = Helper.loadPropertyValue(
+				configFile, PlugintConstants.REFUND_PARAMETER,
 				PlugintConstants.API_MODELS);
 		String[] arrayOfRequestParameterName = requestParameterName.split(",");
 		Class<?>[] params = new Class[arrayOfRequestParameterName.length];
@@ -82,12 +84,12 @@ public class Refund {
 			}
 		}
 		Method refundMethod = sdkClass.getDeclaredMethod(
-				ControllerIni.loadPropertyValue(ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE),
+				Helper.loadPropertyValue(configFile,
 						PlugintConstants.REFUND_METHOD, PlugintConstants.METHODS),
 				params);
 		Object requestBodyObject = Util.convertMapToClass(bodyMap,
 				Class.forName(
-						ControllerIni.loadPropertyValue(ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE),
+						Helper.loadPropertyValue(configFile,
 								PlugintConstants.REFUND_REQUEST_MODEL, PlugintConstants.API_MODELS)));
 		Map<String, Object> paramsForInvocationMap = new HashMap();
 		paramsForInvocationMap.put("orderId", orderId);

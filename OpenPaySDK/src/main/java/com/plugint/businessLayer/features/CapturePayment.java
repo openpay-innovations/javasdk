@@ -21,7 +21,7 @@ public class CapturePayment {
 	public static Object capturePayment(Class<?> sdkClass, Object orderId) throws Exception
 	{
 		Helper.isNotNull(orderId);
-		Wini configFile = ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
+		Wini configFile = Helper.loadApiConfigFile();
 		String sdkClassString = ControllerIni.loadPropertyValue(configFile,
 				PlugintConstants.CAPTURE_PAYMENT_REQUEST_MODEL, PlugintConstants.API_MODELS);
 		Class<?> requestBodyClass = Class

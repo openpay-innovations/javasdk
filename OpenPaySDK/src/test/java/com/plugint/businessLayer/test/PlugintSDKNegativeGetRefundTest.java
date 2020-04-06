@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import com.plugint.businessLayer.constant.PlugintConstants;
 import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.core.PlugintSDK;
 import com.plugint.businessLayer.util.Util;
@@ -34,7 +36,9 @@ public class PlugintSDKNegativeGetRefundTest {
 			;
 			assertNotNull("Request body for refund cannot be null", Util.convertStringToMap(requestJson));
 			Map<String, Object> response;
-			response = sdk.refund(Util.convertStringToMap(requestJson), orderId);
+			String maxRetry = Helper.loadPropertyValue(Helper.loadApiConfigFile(),PlugintConstants.APIRETRYVALUE , PlugintConstants.APIRETRYSECTION);
+			assertNotNull("Max retry config value cannot be null",maxRetry);
+			response = sdk.refund(Util.convertStringToMap(requestJson), orderId, Integer.parseInt(maxRetry));
 			assertNotNull("Response map for refund cannot be null", response);
 			logger.info("Response with error body due to wrong test data" + response);
 		} catch (Exception e) {

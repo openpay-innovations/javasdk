@@ -3,6 +3,7 @@ package com.plugint.businessLayer.features;
 import java.lang.reflect.Method;
 
 import org.apache.log4j.Logger;
+import org.ini4j.Wini;
 
 import com.plugint.businessLayer.constant.PlugintConstants;
 import com.plugint.businessLayer.core.ControllerIni;
@@ -20,12 +21,13 @@ private static final Logger logger = Logger.getLogger(Orders.class);
 	public static Object getOrders(Class<?> sdkClass, Object orderId) throws Exception
 	{
 		Helper.isNotNull(orderId);
-		String sdkClassString = ControllerIni.loadPropertyValue(ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE),
+		Wini configFile = Helper.loadApiConfigFile();
+		String sdkClassString = Helper.loadPropertyValue(configFile,
 				PlugintConstants.GET_ORDERS_REQUEST_MODEL, PlugintConstants.API_MODELS);
 		Class<?> requestBodyClass = Class
 				.forName(sdkClassString);
 		Method orderMethod = sdkClass.getDeclaredMethod(
-				ControllerIni.loadPropertyValue(ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE),
+				Helper.loadPropertyValue(configFile,
 						PlugintConstants.ORDERS_METHOD, PlugintConstants.METHODS),requestBodyClass);
 		return orderMethod.invoke(sdkClass.newInstance(),orderId);
 	}

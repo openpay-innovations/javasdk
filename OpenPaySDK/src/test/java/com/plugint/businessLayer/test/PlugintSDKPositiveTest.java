@@ -40,7 +40,7 @@ public class PlugintSDKPositiveTest {
 
 		Map<String, Object> response;
 		try {
-			response = sdk.getPSPConfig();
+			response = sdk.getPSPConfig(3);
 			assertNotNull("Response for get Limit api cannot be null", response);
 			assertNotNull(response.get("minPrice"));
 			assertNotNull(response.get("maxPrice"));
@@ -66,11 +66,11 @@ public class PlugintSDKPositiveTest {
 	public void ordersPostTestPositive() {
 		Map<String, Object> body = new HashMap<String, Object>();
 		try {
-			Wini configFileName = ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
+			Wini configFileName = Helper.loadApiConfigFile();
 			String createNewOrderJsonStr = Helper.readJson("testData/getTokenPositive.json");
 			body = Util.convertStringToMap(createNewOrderJsonStr);
 			assertNotNull("Converted request map cannot be null", body);
-			Map<String, Object> response = sdk.getToken(body);
+			Map<String, Object> response = sdk.getToken(body, 3);
 			assertNotNull("Response map for create new order cannot be null", response);
 			String transactionToken = Helper.getTransactionTokenTest(response);
 			String redirecturl = Helper.loadPropertyValue(configFileName, PlugintConstants.REDIRECTURL,
@@ -102,7 +102,7 @@ public class PlugintSDKPositiveTest {
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			assertNotNull("Order Id cannot be null", orderId);
 			Map<String, Object> response;
-			response = sdk.capturePayment(orderId);
+			response = sdk.capturePayment(orderId, 3);
 			assertNotNull("Response map for create new order cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {
@@ -123,7 +123,7 @@ public class PlugintSDKPositiveTest {
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			assertNotNull("Order Id cannot be null", orderId);
 			Map<String, Object> response;
-			response = sdk.updateShopOrder(orderId);
+			response = sdk.updateShopOrder(orderId, 3);
 			assertNotNull("Response map for get orders cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {
@@ -146,7 +146,7 @@ public class PlugintSDKPositiveTest {
 			assertNotNull("Request body for refund cannot be null", Util.convertStringToMap(requestJson));
 			assertNotNull("Order id for refund cannot be null", orderId);
 			Map<String, Object> response;
-			response = sdk.refund(Util.convertStringToMap(requestJson), orderId);
+			response = sdk.refund(Util.convertStringToMap(requestJson), orderId, 3);
 			assertNotNull("Response map for refund cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {

@@ -6,10 +6,11 @@
    "chargeBackCount":-1,
    "customerQuality":-1,
    "code":"00015001",
+   "emailAddress":"ecommerce@xx.yy",
    "net":false,
    "totalPriceWithTax":{
       "currencyIso":"USD",
-      "value":2522.87,
+      "value":10000,
       "priceType":"BUY",
       "formattedValue":"$2,522.87",
       "minQuantity":null,
@@ -17,7 +18,7 @@
    },
    "totalPrice":{
       "currencyIso":"USD",
-      "value":2522.87,
+      "value":10000,
       "priceType":"BUY",
       "formattedValue":"$2,522.87",
       "minQuantity":null,

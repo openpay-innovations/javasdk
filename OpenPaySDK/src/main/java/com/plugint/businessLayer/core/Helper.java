@@ -204,10 +204,10 @@ public class Helper {
 	 * 
 	 * @return org.ini4j.Wini
 	 */
-	public static Wini loadConfigFile() {
+	public static Wini loadApiConfigFile() {
 		try {
-			isNotEmpty(PlugintConstants.CONFIG_FILE);
-			return ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
+			isNotEmpty(PlugintConstants.MAPPING_API_FILE);
+			return ControllerIni.loadPropertyFile(PlugintConstants.MAPPING_API_FILE);
 		} catch (Exception e) {
 			logger.error("Exception occured while fetching config file" + e.getMessage());
 			logger.error(e.getStackTrace());

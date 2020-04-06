@@ -12,6 +12,7 @@ import org.junit.runners.JUnit4;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.plugint.businessLayer.constant.PlugintConstants;
 import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.core.PlugintSDK;
 import com.plugint.businessLayer.util.Util;
@@ -43,7 +44,9 @@ public class PlugintSDKNegativeOrderPostTest {
 			String createNewOrderJsonStr = Helper.readJson("testData/getTokenNegative.json");
 			body = Util.convertStringToMap(createNewOrderJsonStr);
 			assertNotNull("Converted request map cannot be null", body);
-			Map<String, Object> response = sdk.getToken(body);
+			String maxRetry = Helper.loadPropertyValue(Helper.loadApiConfigFile(),PlugintConstants.APIRETRYVALUE , PlugintConstants.APIRETRYSECTION);
+			assertNotNull("Max retry config value cannot be null",maxRetry);
+			Map<String, Object> response = sdk.getToken(body,Integer.parseInt(maxRetry));
 			assertNotNull("Response map for create new order cannot be null", response);
 			logger.info("Response with error body due to wrong test data" + response);
 		} catch (Exception e) {

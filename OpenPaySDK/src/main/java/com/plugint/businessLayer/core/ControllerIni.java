@@ -44,6 +44,7 @@ public class ControllerIni {
 	 * @return org.ini4j.Wini
 	 */
 	public static Wini loadPropertyFile(String fileName) throws IOException {
-		return new Wini(new File(fileName));
+		FileLoader fileLoader = new FileLoader();
+		return new Wini(new File(fileLoader.loadFileFromResources(fileName)));
 	}
 }
