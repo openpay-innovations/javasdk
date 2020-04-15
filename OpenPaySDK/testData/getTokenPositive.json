@@ -10,7 +10,7 @@
    "net":false,
    "totalPriceWithTax":{
       "currencyIso":"USD",
-      "value":10000,
+      "value":500.98,
       "priceType":"BUY",
       "formattedValue":"$2,522.87",
       "minQuantity":null,
@@ -18,7 +18,7 @@
    },
    "totalPrice":{
       "currencyIso":"USD",
-      "value":10000,
+      "value":500.98,
       "priceType":"BUY",
       "formattedValue":"$2,522.87",
       "minQuantity":null,
@@ -26,7 +26,7 @@
    },
    "subTotal":{
       "currencyIso":"USD",
-      "value":10000,
+      "value":500.88,
       "priceType":"BUY",
       "formattedValue":"$2,513.88",
       "minQuantity":null,
@@ -77,7 +77,7 @@
          "quantity":1,
          "basePrice":{
             "currencyIso":"USD",
-            "value":2117,
+            "value":2117.11,
             "priceType":"BUY",
             "formattedValue":"$2,117.00",
             "minQuantity":null,
@@ -85,7 +85,7 @@
          },
          "totalPrice":{
             "currencyIso":"USD",
-            "value":2117,
+            "value":2117.11,
             "priceType":"BUY",
             "formattedValue":"$2,117.00",
             "minQuantity":null,

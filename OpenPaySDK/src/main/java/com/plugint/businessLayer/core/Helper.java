@@ -19,19 +19,24 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 import com.plugint.businessLayer.constant.PlugintConstants;
 
-/*
- * Class to read data from file
+/**
+ * This is Helper class which will provide some utility methods:
+ * 
+ * Ex:
+ * 
+ * Reading property file. Writing property file. Check null values etc
  */
 public class Helper {
 
 	private static final Logger logger = Logger.getLogger(Helper.class);
 
-	/*
+	/**
 	 * Read json data from json file
 	 * 
-	 * @param java.lang.String
+	 * @param fileName Sending file name as String to read json data from file
 	 * 
-	 * @return java.lang.String
+	 * @return jsonString read from the file. In case of Exception it will return
+	 *         null
 	 */
 	public static String readJson(String fileName) {
 		try {
@@ -44,16 +49,17 @@ public class Helper {
 		} catch (Exception e) {
 			logger.error("Exception occured while reading file", e.getCause());
 			logger.error("Exception occurred in readJson - ", e);
+			return null;
 		}
-		return null;
+
 	}
 
-	/*
+	/**
 	 * Read text data from txt file
 	 * 
-	 * @param java.lang.String
+	 * @param fileName Sending file name as String to read text data from file
 	 * 
-	 * @return java.lang.String
+	 * @return String read from the file.In case of Exception it will return null
 	 */
 	public static String readText(String fileName) {
 		Scanner sc = null;
@@ -69,17 +75,20 @@ public class Helper {
 		} catch (Exception e) {
 			logger.error("Exception occured while reading file", e.getCause());
 			logger.error("Exception occurred in method readText while reading the file- ", e);
+			return null;
 		} finally {
 			isNotNull(sc);
 			sc.close();
 		}
-		return null;
+
 	}
 
-	/*
+	/**
 	 * Write data to file
 	 * 
-	 * @param java.lang.String,java.lang.String
+	 * @param fileName Sending file name as String to write text data into file
+	 * 
+	 * @param content  Sending content as param which has to be written in file
 	 * 
 	 */
 	public static void usingBufferedWritter(String fileName, String content) {
@@ -106,103 +115,51 @@ public class Helper {
 
 	}
 
-	/*
-	 * Function to redirect url to browser
-	 * 
-	 * @param java.lang.String
-	 */
-	public static void redirectToBrowser(String url) {
-		WebDriver driver = null;
-		try {
-			isNotEmpty(url);
-			logger.info("Opening browser for automation testing");
-			Wini configFileName = ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
-			System.setProperty("webdriver.chrome.driver", loadPropertyValue(configFileName,
-					PlugintConstants.CHROMEDRIVERFILENAME, PlugintConstants.CHROMEDRIVER));
-			driver = new ChromeDriver();
-			driver.get(url);
-			String timeOutValueString = loadPropertyValue(configFileName, PlugintConstants.CHROMEDRIVERTIMEOUT,
-					PlugintConstants.CHROMEDRIVER);
-			long timeOutValue = Long.parseLong(timeOutValueString);
-			Thread.sleep(timeOutValue);
-		} catch (Exception e) {
-			logger.error("Exception occured while reading file", e.getCause());
-			logger.error("Exception occurred in method redirectToBrowser- ", e);
-		} finally {
-			isNotNull(driver);
-			driver.close();
-		}
-	}
-
-	/*
-	 * function to get transaction token from response
-	 * 
-	 * @param java.util.Map
-	 * 
-	 * @return java.lang.String
-	 */
-	public static String getTransactionTokenTest(Map response) {
-		try {
-			isNotNull(response);
-			logger.debug("Sending transaction token from response");
-			LinkedHashMap nextActionJson = (LinkedHashMap) response.get("nextAction");
-			LinkedHashMap formPostJson = (LinkedHashMap) nextActionJson.get("formPost");
-			ArrayList<Map> formFieldsList = (ArrayList) formPostJson.get("formFields");
-			for (Map formFieldMap : formFieldsList) {
-				if (formFieldMap.get("fieldName").equals("TransactionToken")) {
-					return formFieldMap.get("fieldValue").toString();
-				}
-			}
-		} catch (Exception e) {
-			logger.error("Exception occured while fetching transaction token", e.getCause());
-			logger.error("Exception occurred in method getTransactionToken - ", e);
-		}
-
-		return null;
-	}
-
-	/*
+	/**
 	 * Function to check not null
 	 * 
-	 * @param java.lang.Object
+	 * @param checkObjectNull Generic Object is sent as param to check if not null
 	 * 
-	 * @return java.lang.IllegalArgumentException
 	 */
-	public static void isNotNull(Object object) {
-		if (object == null)
+	public static void isNotNull(Object checkObjectNull) {
+		if (checkObjectNull == null)
 			throw new IllegalArgumentException("illegal null");
 	}
 
-	/*
+	/**
 	 * Function to check empty string
 	 * 
-	 * @param java.lang.String
+	 * @param checkStringEmpty String is sent as param to check if not Empty or null
 	 * 
-	 * @return java.lang.IllegalArgumentException
 	 */
-	public static void isNotEmpty(String string) {
-		if (string == null || string.equals(""))
+	public static void isNotEmpty(String checkStringEmpty) {
+		if (checkStringEmpty == null || checkStringEmpty.equals(""))
 			throw new IllegalArgumentException("illegal empty string");
 	}
 
-	/*
-	 * load property values
+	/**
+	 * Function to load particular value of given section of property file.
 	 * 
-	 * @param org.ini4j.Wini,java.lang.String, java.lang.String
-	 * 
-	 * @return java.lang.String
+	 * @param configFileObj File object which will contain property file. Ex:
+	 *                      merchantConfig.ini
+	 * @param key           String key to load particular value. Ex:password
+	 * @param section       String value to load particular section of propertyFile
+	 *                      Ex: authentication
+	 * @return value of that key in the particular section.
 	 */
-	public static String loadPropertyValue(Wini file, String key, String section) {
-		isNotNull(file);
+	public static String loadPropertyValue(Wini configFileObj, String key, String section) {
+		isNotNull(configFileObj);
 		isNotEmpty(key);
 		isNotEmpty(section);
-		return ControllerIni.loadPropertyValue(file, key, section);
+		return ControllerIni.loadPropertyValue(configFileObj, key, section);
 	}
 
-	/*
-	 * returning config file
+	/**
+	 * Function to load Api config property file.
 	 * 
-	 * @return org.ini4j.Wini
+	 * @return File object which will contain property mappingApiConfig.ini file. In
+	 *         case of Exception return null
+	 * 
 	 */
 	public static Wini loadApiConfigFile() {
 		try {
@@ -211,7 +168,25 @@ public class Helper {
 		} catch (Exception e) {
 			logger.error("Exception occured while fetching config file" + e.getMessage());
 			logger.error(e.getStackTrace());
+			return null;
 		}
-		return null;
 	}
+
+	/**
+	 * Get max retry value from mappingApiConfig.ini from [APIRetry] section. This
+	 * integer value is used by functions of PlugintSDK.java to retry API calls max
+	 * upto this value if socket timeout exception occurs. Set maxRetry value as 0
+	 * if its not configured in property file
+	 * 
+	 * @return int max retry value
+	 */
+	public static int getMaxRetryValue() {
+		String maxRetry = Helper.loadPropertyValue(Helper.loadApiConfigFile(), PlugintConstants.APIRETRYVALUE,
+				PlugintConstants.APIRETRYSECTION);
+		if (maxRetry.isEmpty()) {
+			maxRetry = "0";
+		}
+		return Integer.parseInt(maxRetry);
+	}
+
 }

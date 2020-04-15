@@ -14,41 +14,67 @@ import org.json.simple.parser.ParseException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plugint.businessLayer.constant.PlugintConstants;
+import com.plugint.businessLayer.customLayer.Customizations;
 import com.plugint.businessLayer.util.Util;
 
-/*
- * Core functionality class
+/**
+ * RequestCreaterHelper class contains methods which create Request body for
+ * methods of SDK layer based on properties of mappingShopConfig.ini and
+ * mappingApiConfig.ini
  */
 public class RequestCreaterHelper {
 
 	private static final Logger logger = Logger.getLogger(RequestCreaterHelper.class);
 
-	/*
-	 * Create a request body map based on each configuration file value
+	/**
+	 * Method created a request body key value pair map where key is attribute name
+	 * of particular Request Model of API method and value is the value to be sent
+	 * to API from shop.Its a recursive function which add each API key and value to
+	 * the map.
 	 * 
-	 * @param String, String, java.util.Map, java.util.Map
+	 * @param apiValue             String coming from calling function which is the
+	 *                             value of particular key from
+	 *                             mappingApiConfig.ini. Example firstName =
+	 *                             customerJourney.online.customerDetails.firstName
 	 * 
-	 * @return java.util.Map
+	 * @param shopMappingValue     String coming from calling function which is the
+	 *                             value of same key of apiValue from
+	 *                             mappingShopConfig.ini. Example firstName =
+	 *                             deliveryAddress.firstName
+	 * 
+	 * @param bodyMap              New Map object is sent to function which is set
+	 *                             recursively with API value as key and value from
+	 *                             reqJsonToMap
+	 * 
+	 * @param shopSystemRequestMap This Map is iterated and value is fetched for
+	 *                             each shopMappingValue and set as value to @param
+	 *                             bodyMap for particular key @param apiValue
+	 * 
+	 * @return BodyMap Object with key value pair of keys as attributes to
+	 *         requestModel and value as value from shopData
+	 * 
+	 * @throws IOException    if property file is not loaded successfully
+	 * 
+	 * @throws ParseException
 	 */
 	@SuppressWarnings("unchecked")
 	public static Object createRequestBodyMap(String apiValue, String shopMappingValue,
-			LinkedHashMap<String, Object> bodyMap, Map<String, Object> reqJsonToMap)
+			LinkedHashMap<String, Object> bodyMap, Map<String, Object> shopSystemRequestMap)
 			throws IOException, ParseException {
 		Helper.isNotEmpty(apiValue);
-		Helper.isNotNull(reqJsonToMap);
+		Helper.isNotNull(shopSystemRequestMap);
 		String[] apiValueArrayOfString = apiValue.split("\\.");
-		// End condition for recursion.(to set value in map use key for property)
 		if (apiValueArrayOfString.length == 1) {
 			if (bodyMap.containsKey(apiValueArrayOfString[0])) {
 				bodyMap = new LinkedHashMap();
 			}
-			bodyMap.put(apiValueArrayOfString[0], extractDataFromShop(reqJsonToMap, shopMappingValue));
+			bodyMap.put(apiValueArrayOfString[0], extractDataFromShop(shopSystemRequestMap, shopMappingValue));
 			return bodyMap;
 		}
 		String firstValFromApiValueArrayOfString = apiValueArrayOfString[0];
 		ObjectMapper mapper = new ObjectMapper();
 		if (firstValFromApiValueArrayOfString.equals(PlugintConstants.ARRAY_STRING)) {
-			Object shopArrayObj = extractArrayDataFromShop(reqJsonToMap, shopMappingValue);
+			Object shopArrayObj = extractArrayDataFromShop(shopSystemRequestMap, shopMappingValue);
 			String shopArrayObjString = mapper.writeValueAsString(shopArrayObj);
 			JSONArray jsonarr = new JSONArray(shopArrayObjString);
 			String afterArrayShopMappingValue = extractAfterArrayString(shopMappingValue);
@@ -83,12 +109,12 @@ public class RequestCreaterHelper {
 					&& !(bodyMap.get(firstValFromApiValueArrayOfString) instanceof java.util.ArrayList)) {
 				Object firstValObject = bodyMap.get(firstValFromApiValueArrayOfString);
 				Object nestedbodyObject = createRequestBodyMap(nestedString, shopMappingValue,
-						(LinkedHashMap<String, Object>) Util.convertObjectToMap(firstValObject), reqJsonToMap);
+						(LinkedHashMap<String, Object>) Util.convertObjectToMap(firstValObject), shopSystemRequestMap);
 				bodyMap.replace(firstValFromApiValueArrayOfString, nestedbodyObject);
 			} else {
 				ArrayList firstValObject = (ArrayList) bodyMap.get(firstValFromApiValueArrayOfString);
 				List<Object> objList = new ArrayList();
-				Object shopArrayObj = extractArrayDataFromShop(reqJsonToMap, shopMappingValue);
+				Object shopArrayObj = extractArrayDataFromShop(shopSystemRequestMap, shopMappingValue);
 				String shopArrayObjString = mapper.writeValueAsString(shopArrayObj);
 				JSONArray jsonarr = new JSONArray(shopArrayObjString);
 				String afterArrayShopMappingValue = extractAfterArrayString(shopMappingValue);
@@ -106,35 +132,43 @@ public class RequestCreaterHelper {
 
 		} else {
 			Object nestedbodyObject = createRequestBodyMap(nestedString, shopMappingValue,
-					new LinkedHashMap<String, Object>(), reqJsonToMap);
+					new LinkedHashMap<String, Object>(), shopSystemRequestMap);
 			bodyMap.put(firstValFromApiValueArrayOfString, nestedbodyObject);
 		}
 		return bodyMap;
 	}
 
-	/*
-	 * extracting values from shop object
+	/**
+	 * Method iterate @param reqJsonToMap map and get the value of particular
+	 * key @param shopMappingValue
 	 * 
-	 * @param java.util.Map, String
+	 * @param shopSystemRequestMap Map coming from shop system which contains
+	 *                             relevant data used to create request body for API
+	 *                             method
 	 * 
-	 * @return java.lang.Object
+	 * @param shopMappingValue     key coming from calling function which is sent
+	 *                             to @param reqJsonToMap to get value
+	 * 
+	 * @return Generic Object from Map for particular key.
 	 */
-	public static Object extractDataFromShop(Map<String, Object> reqJsonToMap, String shopMappingValue) {
+	public static Object extractDataFromShop(Map<String, Object> shopSystemRequestMap, String shopMappingValue) {
 		try {
 			if (shopMappingValue == null || shopMappingValue.isEmpty()) {
 				return null;
 			}
 			String[] arrOfShop = shopMappingValue.split("\\.");
 			for (int index = 0; index < arrOfShop.length; index++) {
-				Object reqJsonToMapValue = reqJsonToMap.get(arrOfShop[index]);
+				Object shopSystemRequestMapValue = shopSystemRequestMap.get(arrOfShop[index]);
 				if (index + 1 == arrOfShop.length) {
-					if (reqJsonToMapValue != null) {
-						return reqJsonToMapValue;
+					if (shopSystemRequestMapValue != null) {
+						shopSystemRequestMapValue = Customizations.requestCustomization(shopSystemRequestMapValue,
+								shopMappingValue);
+						return shopSystemRequestMapValue;
 					} else {
 						return null;
 					}
 				} else {
-					reqJsonToMap = Util.convertObjectToMap(reqJsonToMapValue);
+					shopSystemRequestMap = Util.convertObjectToMap(shopSystemRequestMapValue);
 				}
 			}
 		} catch (Exception e) {
@@ -145,15 +179,21 @@ public class RequestCreaterHelper {
 		return null;
 	}
 
-	/*
-	 * Extract array data from shop platform
+	/**
+	 * Method iterate @param reqJsonToMap map and get the value of particular
+	 * key @param shopMappingValue by iterating array data present in map (if
+	 * present). Example multiple product data in cart
 	 * 
-	 * @param java.util.Map,String
+	 * @param shopSystemRequestMap Map coming from shop system which contains
+	 *                             relevant data used to create request body for API
+	 *                             method
 	 * 
-	 * @return java.lang.Object
+	 * @param shopMappingValue     key coming from calling function which is sent
+	 *                             to @param reqJsonToMap to get value
 	 * 
+	 * @return Generic Object from Map for particular key.
 	 */
-	public static Object extractArrayDataFromShop(Map<String, Object> reqJsonToMap, String shopMappingValue) {
+	public static Object extractArrayDataFromShop(Map<String, Object> shopSystemRequestMap, String shopMappingValue) {
 		try {
 			if (shopMappingValue == null || shopMappingValue.isEmpty()) {
 				return null;
@@ -161,7 +201,7 @@ public class RequestCreaterHelper {
 			String[] shoppingMapKeyArray = shopMappingValue.split("\\.");
 
 			for (int index = 0; index < shoppingMapKeyArray.length; index++) {
-				Object shoppingMapKeyObject = reqJsonToMap.get(shoppingMapKeyArray[index]);
+				Object shoppingMapKeyObject = shopSystemRequestMap.get(shoppingMapKeyArray[index]);
 				if (shoppingMapKeyArray[index + 1].equals(PlugintConstants.ARRAY_STRING)) {
 					return shoppingMapKeyObject;
 				}
@@ -172,7 +212,7 @@ public class RequestCreaterHelper {
 						return null;
 					}
 				} else {
-					reqJsonToMap = Util.convertObjectToMap(shoppingMapKeyObject);
+					shopSystemRequestMap = Util.convertObjectToMap(shoppingMapKeyObject);
 				}
 			}
 		} catch (Exception e) {
@@ -183,12 +223,18 @@ public class RequestCreaterHelper {
 		return null;
 	}
 
-	/*
-	 * extractAfterArrayString
+	/**
+	 * Function to extract Substring from @shopMappingValue after "array"
 	 * 
-	 * @param java.lang.String
+	 * @param shopMappingValue String coming from calling function is the value of
+	 *                         particular key from mappingShopConfig.ini
 	 * 
-	 * @return java.lang.String
+	 *                         example for entries.array.product.name return
+	 *                         product.name
+	 * 
+	 * @return Substring beinge extracted from @param shopMappingValue
+	 * 
+	 * 
 	 */
 	public static String extractAfterArrayString(String shopMappingValue) {
 		try {

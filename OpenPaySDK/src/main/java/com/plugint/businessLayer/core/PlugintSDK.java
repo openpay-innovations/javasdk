@@ -18,28 +18,54 @@ import com.plugint.client.ApiException;
 import com.plugint.client.Configuration;
 import com.plugint.client.auth.HttpBasicAuth;
 
-/*
- * Base Core class to class Api Methods
+/**
+ * Business Layer Entry Class which contains all calls To SDK Request body is
+ * created in each function and sending response back to calling function.
  */
 public class PlugintSDK {
 	private static final Logger logger = Logger.getLogger(PlugintSDK.class);
 	static Class<?> sdkClass;
 
-	/*
-	 * Default constructor to authenticate api's
+	/**
+	 * Default constructor to authenticate api's. It makes call to
+	 * doAuthentication() function to set basic authentication headers
 	 */
 	public PlugintSDK() {
 		doAuthentication();
 	}
 
-	/*
-	 * GetToken method to get token for creating new orders in payment gateway
+	/**
+	 * GetToken method creates request from @param cartData and make a call to api
+	 * method in SDK layer. As this is a Generic method created to be used on
+	 * multiple platforms, Api method ([Method] section) and class([ApiClass]
+	 * section are loaded from mappingApiconfig.ini using reflections
+	 * 
+	 * Tokenisation method basically creates a new order request
 	 *
-	 * @param java.util.Map
+	 * @param cartData      It is a Map object coming from calling function which
+	 *                      contains relevant data required to make create new order
+	 *                      call with key value pair map where keys can be relevant
+	 *                      to the attributes.For creating new order you can send
+	 *                      cart data object(if it contains all relevant information
+	 *                      else send data based on shop system) in map along with
+	 *                      other fields like callbackURL,failURL etc Please refer
+	 *                      API document to check attributes related information
+	 *                      Please refer API documentation for fields related
+	 *                      information {key, value} : {String, Object}
+	 * 
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
 	 *
-	 * @return java.lang.Object
+	 * @return Response in form of map object. Calling function can use the response
+	 *         map for further implementations
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> getToken(final Map<String, Object> cartData, int maxRetry) throws Exception {
+	public Map<String, Object> getToken(final Map<String, Object> cartData, int attemptNumber) throws Exception {
 		Helper.isNotNull(cartData);
 		logger.info("GET TOKEN Call BEGINS");
 		try {
@@ -56,12 +82,12 @@ public class PlugintSDK {
 		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
 				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
-					while (maxRetry > 0) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
 						logger.info("Retrying again due to timeout exception");
-						maxRetry--;
-						return getToken(cartData, maxRetry);
-					}
-					if (maxRetry == 0) {
+						attemptNumber++;
+						return getToken(cartData, attemptNumber);
+					} else {
 						throw e;
 					}
 				} else {
@@ -77,14 +103,40 @@ public class PlugintSDK {
 
 	}
 
-	/*
-	 * Refund function to call refund Api
+	/**
+	 * Refund method creates request from @param refundData @param orderId and make
+	 * a call to api method in SDK layer. As this is a Generic method created to be
+	 * used on multiple platforms, Api method ([Method] section) and
+	 * class([ApiClass] section are loaded from mappingApiconfig.ini using
+	 * reflections
 	 *
-	 * @param java.util.Map
+	 * Refund method basically used to do refunds
 	 *
-	 * @return java.util.Map
+	 * @param refundData    It is a Map object coming from calling function which
+	 *                      contains relevant data required to make refund call like
+	 *                      refundData with key value pair map where keys can be
+	 *                      relevant to the attributes.Please refer API
+	 *                      documentation for fields related information {key,
+	 *                      value} : {String, Object}
+	 * 
+	 * @param orderId       Object contains orderId/id's to get refund for
+	 *                      particular order. Refer API document to check data types
+	 * 
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of java.util.map object. Calling function can use
+	 *         the response map for further implementations.Please check API
+	 *         documentation for response details coming from API {key, value} :
+	 *         {String, Object}
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> refund(final Map<String, Object> refundData, final Object orderId, int maxRetry)
+	public Map<String, Object> refund(final Map<String, Object> refundData, final Object orderId, int attemptNumber)
 			throws Exception {
 		Helper.isNotNull(refundData);
 		Helper.isNotNull(orderId);
@@ -103,12 +155,12 @@ public class PlugintSDK {
 		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
 				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
-					while (maxRetry > 0) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
 						logger.info("Retrying again due to timeout exception");
-						maxRetry--;
-						return refund(refundData, orderId, maxRetry);
-					}
-					if (maxRetry == 0) {
+						attemptNumber++;
+						return refund(refundData, orderId, attemptNumber);
+					} else {
 						throw e;
 					}
 				} else {
@@ -123,12 +175,27 @@ public class PlugintSDK {
 		}
 	}
 
-	/*
-	 * GetLimit Function
+	/**
+	 * GetPSPConfig method make a call to api method in SDK layer. As this is a
+	 * Generic method created to be used on multiple platforms, Api method ([Method]
+	 * section) and class([ApiClass] section are loaded from mappingApiconfig.ini
+	 * using reflections
 	 *
-	 * @return java.Util.Map
+	 * GetPSPConfig method basically used to set price limits for purchase
+	 * 
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of map object. Calling function can use the response
+	 *         map for further implementations
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> getPSPConfig(int maxRetry) throws Exception {
+	public Map<String, Object> getPSPConfig(int attemptNumber) throws Exception {
 		logger.info("LIMIT CONFIG CALL BEGINS");
 		try {
 			final Object response = Limits.getLimits(sdkClass);
@@ -140,12 +207,12 @@ public class PlugintSDK {
 		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
 				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
-					while (maxRetry > 0) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
 						logger.info("Retrying again due to timeout exception");
-						maxRetry--;
-						return getPSPConfig(maxRetry);
-					}
-					if (maxRetry == 0) {
+						attemptNumber++;
+						return getPSPConfig(attemptNumber);
+					} else {
 						throw e;
 					}
 				} else {
@@ -162,12 +229,29 @@ public class PlugintSDK {
 
 	}
 
-	/*
-	 * GetOrders Function
+	/**
+	 * UpdateShopOrder method creates request from @param orderId and make a call to
+	 * api method in SDK layer. As this is a Generic method created to be used on
+	 * multiple platforms, Api method ([Method] section) and class([ApiClass]
+	 * section are loaded from mappingApiconfig.ini using reflections
 	 *
-	 * @return java.Util.Map
+	 * UpdateShopOrder basically update particular order in third party system
+	 * 
+	 * @param orderId       Object contains orderId/id's to get refund for
+	 *                      particular order.Refer API document to check data types
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of map object. Calling function can use the response
+	 *         map for further implementations
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> updateShopOrder(final Object orderId, int maxRetry) throws Exception {
+	public Map<String, Object> updateShopOrder(final Object orderId, int attemptNumber) throws Exception {
 		Helper.isNotNull(orderId);
 		logger.info("UPDATING SHOP ORDERS");
 		try {
@@ -180,12 +264,12 @@ public class PlugintSDK {
 		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
 				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
-					while (maxRetry > 0) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
 						logger.info("Retrying again due to timeout exception");
-						maxRetry--;
-						return updateShopOrder(orderId, maxRetry);
-					}
-					if (maxRetry == 0) {
+						attemptNumber++;
+						return updateShopOrder(orderId, attemptNumber);
+					} else {
 						throw e;
 					}
 				} else {
@@ -200,12 +284,29 @@ public class PlugintSDK {
 		}
 	}
 
-	/*
-	 * capture payment Function
+	/**
+	 * CapturePayment method creates request from @param orderId and make a call to
+	 * api method in SDK layer. As this is a Generic method created to be used on
+	 * multiple platforms, Api method ([Method] section) and class([ApiClass]
+	 * section are loaded from mappingApiconfig.ini using reflections
 	 *
-	 * @return java.Util.Map
+	 * Capture payment basically confirms captures the payment in third party system
+	 * 
+	 * @param orderId       Object contains orderId/id's to get refund for
+	 *                      particular order.Refer API document to check data types
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of map object. Calling function can use the response
+	 *         map for further implementations
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> capturePayment(final Object orderId, int maxRetry) throws Exception {
+	public Map<String, Object> capturePayment(final Object orderId, int attemptNumber) throws Exception {
 		Helper.isNotNull(orderId);
 		logger.info("CAPTURING PAYMENT");
 		try {
@@ -218,12 +319,12 @@ public class PlugintSDK {
 		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
 				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
-					while (maxRetry > 0) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
 						logger.info("Retrying again due to timeout exception");
-						maxRetry--;
-						return capturePayment(orderId, maxRetry);
-					}
-					if (maxRetry == 0) {
+						attemptNumber++;
+						return capturePayment(orderId, attemptNumber);
+					} else {
 						throw e;
 					}
 				} else {
@@ -239,8 +340,13 @@ public class PlugintSDK {
 		}
 	}
 
-	/*
-	 * Method to do authentication
+	/**
+	 * This method is basically called in constructor method to set authentication
+	 * parameters in header for each API call. UserName and password are fetch from
+	 * merchantConfig.ini
+	 * 
+	 * sdkClass is global param which sets the value API class to be called from SDK
+	 * layer from [ApiClass] section of mappingAPIConfig.ini
 	 *
 	 */
 	public static void doAuthentication() {

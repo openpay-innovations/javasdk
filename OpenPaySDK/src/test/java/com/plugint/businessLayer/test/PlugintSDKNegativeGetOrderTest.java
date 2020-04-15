@@ -12,8 +12,9 @@ import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.core.PlugintSDK;
 import com.plugint.client.ApiException;
 
-/*
- * Test class with negative test cases
+/**
+ * Get order status test class is created to check status of orders  using
+ * negative test data or wrong test data
  */
 @RunWith(JUnit4.class)
 public class PlugintSDKNegativeGetOrderTest {
@@ -26,16 +27,14 @@ public class PlugintSDKNegativeGetOrderTest {
 	 *
 	 * 
 	 *
-	 * @throws ApiException if the Api call fails
+	 * @throws Exception if the Api call fails
 	 */
 	@Test
 	public void ordersOrderIdGetTestNegative() {
 		try {
 			String orderId = Helper.readText("testData/testOrderNegative.txt");
 			Map<String, Object> response;
-			String maxRetry = Helper.loadPropertyValue(Helper.loadApiConfigFile(),PlugintConstants.APIRETRYVALUE , PlugintConstants.APIRETRYSECTION);
-			assertNotNull("Max retry config value cannot be null",maxRetry);
-			response = sdk.updateShopOrder(orderId, Integer.parseInt(maxRetry));
+			response = sdk.updateShopOrder(orderId,1);
 			assertNotNull("Response map for get orders cannot be null", response);
 			logger.info("Response with error body due to wrong test data" + response);
 		} catch (Exception e) {

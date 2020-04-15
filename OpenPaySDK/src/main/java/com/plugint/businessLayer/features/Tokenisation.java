@@ -19,24 +19,36 @@ import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.core.RequestCreaterHelper;
 import com.plugint.businessLayer.util.Util;
 
-/*
- * Feature class 
+/**
+ * Feature class Tokenisation is created to call API method for SDK layer , send
+ * request data and get the response back. This class is being called by method
+ * GetToken() of PlugintSDK.java to create Request body for API and calling SDK
+ * layer to get new token by creating new orders
+ * 
  */
 public class Tokenisation {
 
 	private static final Logger logger = Logger.getLogger(Tokenisation.class);
 
-	/*
-	 * Create body function to create body for tokenisations
+	/**
+	 * This function is used to create request body for Tokenisation call. It makes
+	 * call to RequestCreaterHelper.createRequestBodyMap() with required parameters
+	 * recursively to create request body in form of Map.
 	 * 
-	 * @param java.util.Map
+	 * @param jsonMap This map is request map coming from shop system with all
+	 *                attributes required to create request for Tokenisation call
 	 * 
-	 * @return java.util.Map
+	 * @return RequestBodyMap is created that is to be sent to API method in SDK
+	 *         layer.
+	 * 
+	 * @throws IOException    Throws this exception if Property file is not loaded
+	 *                        successfully
+	 * @throws ParseException
 	 */
 	public static Map<String, Object> createBody(Map<String, Object> jsonMap) throws IOException, ParseException {
 		Helper.isNotNull(jsonMap);
 		Wini apiFile = Helper.loadApiConfigFile();
-		Section tokenisationList = ControllerIni.loadProperties(apiFile, "createOrder");
+		Section tokenisationList = ControllerIni.loadProperties(apiFile, PlugintConstants.CREATE_ORDER_SECTION);
 		Set<String> tokenisationSet = tokenisationList.keySet();
 		Iterator<String> iterateTokenisationSet = tokenisationSet.iterator();
 		LinkedHashMap<String, Object> bodyMap = new LinkedHashMap();
@@ -54,12 +66,26 @@ public class Tokenisation {
 		return bodyMap;
 	}
 
-	/*
-	 * Function to send getToken request to API
+	/**
+	 * This function calls API method from SDK layer based on request data coming
+	 * from calling function. It is using java Reflection feature to load method
+	 * name and number of parameters from [Method] section and [ApiModels] section
+	 * mappingApiConfig.xml.
 	 * 
-	 * @param java.lang.Class<?>, java.Util.Map
+	 * @param sdkClass Global parameter set in PlugintSDK.java during
+	 *                 authentication. Contains ClassName of API class present in
+	 *                 SDK layer. Name of class is present in [ApiClass] section in
+	 *                 mappingApiConfig.xml
 	 * 
-	 * @return java.lang.Object
+	 * @param bodyMap  Request Map created for Tokenisation call using
+	 *                 Tokenisation.createBody() method is converted to
+	 *                 RequestModelClass using Reflections where name of class is
+	 *                 stored in mappingApiConfig.ini under [ApiModels] section
+	 * 
+	 * @return Response Object coming from SDK layer
+	 * 
+	 * @throws Exception Generic exception is thrown if some issue occurred while
+	 *                   sending request to SDK or while invoking methods
 	 */
 	public static Object sendTokenisationRequest(Class<?> sdkClass, Map<String, Object> bodyMap) throws Exception {
 		Helper.isNotNull(bodyMap);

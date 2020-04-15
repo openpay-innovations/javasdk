@@ -1,50 +1,52 @@
 package com.plugint.businessLayer.core;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
 import org.ini4j.Wini;
 import org.ini4j.Profile.Section;
-
-import com.plugint.businessLayer.features.Tokenisation;
-
-/*
+/**
  * Common controller to load property files
  */
 public class ControllerIni {
 
-	/*
-	 * function to load particular section of property file
+	/**
+	 * Function to load particular section of property file.
 	 * 
-	 * @param org.ini4j.Wini, String
-	 * 
-	 * @return org.ini4j.Profile.Section
+	 * @param configFileObj File object which will contain property file. Ex:
+	 *                      merchantConfig.ini
+	 * @param section       String value to load particular section of propertyFile
+	 *                      Ex: authentication
+	 * @return All keys and values of that section.
 	 */
-	public static Section loadProperties(Wini ini, String section) {
-		return ini.get(section);
+	public static Section loadProperties(Wini configFileObj, String section) {
+		return configFileObj.get(section);
 	}
 
-	/*
-	 * function to load particular value of property file
+	/**
+	 * Function to load particular value of given section of property file.
 	 * 
-	 * @param org.ini4j.Wini, String,String
-	 * 
-	 * @return String
+	 * @param configFileObj File object which will contain property file. Ex:
+	 *                      merchantConfig.ini
+	 * @param key           String key to load particular value. Ex:password
+	 * @param section       String value to load particular section of propertyFile
+	 *                      Ex: authentication
+	 * @return value of that key in the particular section.
 	 */
-	public static String loadPropertyValue(Wini ini, String key, String section) {
-		return ini.get(section, key);
+	public static String loadPropertyValue(Wini configFileObj, String key, String section) {
+		return configFileObj.get(section, key);
 	}
 
-	/*
-	 * function to load property file
+	/**
+	 * Function to load property file.
 	 * 
-	 * @param String
+	 * @param fileName file with this fileName to be loaded . Ex:
+	 *                 merchantConfig.ini
+	 * @return File object which will contain property file.
 	 * 
-	 * @return org.ini4j.Wini
+	 * @throws IOException if file is not loaded successfully
 	 */
 	public static Wini loadPropertyFile(String fileName) throws IOException {
 		FileLoader fileLoader = new FileLoader();
-		return new Wini(new File(fileLoader.loadFileFromResources(fileName)));
+		return new Wini(fileLoader.loadFileFromResources(fileName));
 	}
 }
