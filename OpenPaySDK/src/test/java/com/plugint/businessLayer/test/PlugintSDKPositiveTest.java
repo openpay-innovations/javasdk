@@ -83,7 +83,6 @@ public class PlugintSDKPositiveTest {
 			logger.info("Capturing payment");
 			ordersOrderIdCapturePostTestPositive();
 			ordersOrderIdGetTestPositive();
-			ordersOrderIdRefundPostTestPositive();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			logger.error(e);
@@ -117,26 +116,6 @@ public class PlugintSDKPositiveTest {
 			Map<String, Object> response;
 			response = sdk.updateShopOrder(orderId,1);
 			assertNotNull("Response map for get orders cannot be null", response);
-			logger.info(response);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			logger.error(e);
-		}
-	}
-
-	/**
-	 * Requests that an order is partially or fully refunded.
-	 *
-	 */
-	public void ordersOrderIdRefundPostTestPositive() {
-		try {
-			String orderId = Helper.readText("testData/testOrderPositive.txt");
-			String requestJson = Helper.readJson("testData/getRefundPositive.json");
-			assertNotNull("Request body for refund cannot be null", Util.convertStringToMap(requestJson));
-			assertNotNull("Order id for refund cannot be null", orderId);
-			Map<String, Object> response;
-			response = sdk.refund(Util.convertStringToMap(requestJson), orderId,1);
-			assertNotNull("Response map for refund cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
