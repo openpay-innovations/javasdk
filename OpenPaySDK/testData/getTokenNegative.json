@@ -148,5 +148,29 @@
       "defaultAddress":false,
       "visibleInAddressBook":true,
       "formattedAddress":"14171 prestige shantiniketan, Whitefield, Bangalore, 560048"
-   }
+   },
+     "paymentAddress":{
+      "id":null,
+      "title":"miss",
+      "titleCode":null,
+      "firstName":"Nupur",
+      "lastName":"Gupta",
+      "companyName":null,
+      "line1":"Abc",
+      "line2":null,
+      "town":"Delhi",
+      "region":null,
+      "postalCode":"110009",
+      "phone":null,
+      "email":"admin1234@gmail.com",
+      "country":{
+      "isocode":"BY",
+      "name":"Belarus"
+      },
+      "shippingAddress":false,
+      "billingAddress":true,
+      "defaultAddress":false,
+      "visibleInAddressBook":false,
+      "formattedAddress":null
+     }
 }
