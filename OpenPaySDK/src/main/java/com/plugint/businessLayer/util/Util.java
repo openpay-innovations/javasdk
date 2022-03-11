@@ -2,41 +2,38 @@ package com.plugint.businessLayer.util;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.simple.parser.ParseException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plugint.businessLayer.core.Helper;
-import com.plugint.businessLayer.features.CapturePayment;
 
-/*
- * Utility class 
+/**
+ * Utility class created to handle all jackson conversions realted functions
+ * like converting map to object or map to class and so on.
  */
 public class Util {
-	
+
 	private static final Logger logger = Logger.getLogger(Util.class);
-	/*
-	 * function to convert object to map
+
+	/**
+	 * Function to convert Object to Map. Generic object is converted to Map Collection
 	 * 
-	 * @param java.lang.Object
+	 * @param objectToBeConverted Sent by calling function, to be converted to Map
 	 * 
-	 * @return java.util.Map
+	 * @return Map Collection is returned to calling function
 	 */
 	@SuppressWarnings("unchecked")
 	public static LinkedHashMap<String, Object> convertObjectToMap(Object objectToBeConverted) {
 		try {
-		Helper.isNotNull(objectToBeConverted);
-		ObjectMapper oMapper = new ObjectMapper();
-		return oMapper.convertValue(objectToBeConverted, LinkedHashMap.class);
-		}catch(Exception e)
-		{
+			Helper.isNotNull(objectToBeConverted);
+			ObjectMapper oMapper = new ObjectMapper();
+			return oMapper.convertValue(objectToBeConverted, LinkedHashMap.class);
+		} catch (Exception e) {
 			logger.error("Exception occured while converting ObjectToMap", e.getCause());
 			logger.error("Exception occurred in convertObjectToMap - ", e);
 		}
@@ -44,23 +41,22 @@ public class Util {
 
 	}
 
-	/*
-	 * Convert Map to Object
+	/**
+	 * Function to convert Map to Object.  Map is converted to Generic object
 	 * 
-	 * @param java.util.Map
+	 * @param mapToBeConverted Sent by calling function, to be converted to Generic object
 	 * 
-	 * @return java.lang.Object
+	 * @return Object is returned to calling function
 	 */
 	public static Object convertMapToObject(Map<String, Object> mapToBeConverted) {
 		try {
-		Helper.isNotNull(mapToBeConverted);
-		ObjectMapper oMapper = new ObjectMapper();
-		if (mapToBeConverted.isEmpty()) {
-			return null;
-		}
-		return oMapper.convertValue(mapToBeConverted, Object.class);
-		}catch(Exception e)
-		{
+			Helper.isNotNull(mapToBeConverted);
+			ObjectMapper oMapper = new ObjectMapper();
+			if (mapToBeConverted.isEmpty()) {
+				return null;
+			}
+			return oMapper.convertValue(mapToBeConverted, Object.class);
+		} catch (Exception e) {
 			logger.error("Exception occured while converting MapToObject", e.getCause());
 			logger.error("Exception occurred in convertMapToObject - ", e);
 		}
@@ -68,12 +64,14 @@ public class Util {
 
 	}
 
-	/*
-	 * Convert Map to JsonString
+	/**
+	 * Function to convert Map to Json String.  Map is converted to Json String
 	 * 
-	 * @param java.util.Map
+	 * @param mapToBeConverted Sent by calling function, to be converted to Json String
 	 * 
-	 * @return java.lang.String
+	 * @return String in form of Json is returned to calling function 
+	 * 
+	 * @throws JsonProcessingException If Map data is not sent correctly, won't be converted to json string
 	 */
 	public static String convertMapToJsonString(Map<String, Object> mapToBeConverted) throws JsonProcessingException {
 		Helper.isNotNull(mapToBeConverted);
@@ -85,12 +83,18 @@ public class Util {
 
 	}
 
-	/*
-	 * Convert String to map
+	/**
+	 * Function to convert String to Map.  String is converted to Linked Hash Map
 	 * 
-	 * @param String
+	 * @param stringToBeConverted Sent by calling function, to be converted to Linked Hash Map
 	 * 
-	 * @return java.util.Map
+	 * @return LinkedHashMap is returned to calling function
+	 * 
+	 * @throws JsonParseException
+	 * 
+	 *			JsonMappingException
+	 *	
+	 *			IOException
 	 */
 	@SuppressWarnings("unchecked")
 	public static LinkedHashMap<String, Object> convertStringToMap(String stringToBeConverted)
@@ -103,99 +107,50 @@ public class Util {
 		return (LinkedHashMap<String, Object>) objectMapper.readValue(stringToBeConverted, Map.class);
 	}
 
-	/*
-	 * Convert map to class
+	/**
+	 * Function to convert Map to Class.  Map is converted to Class
 	 * 
-	 * @param java.util.Map, java.lang.Class<?>
+	 * @param mapToBeConverted Sent by calling function, to be converted to Class
 	 * 
-	 * @return java.lang.Object
+	 * @return Class is returned to calling function
 	 */
 	public static Object convertMapToClass(Map<String, Object> mapToBeConverted, Class<?> finalClass) {
 		try {
-		Helper.isNotNull(mapToBeConverted);
-		ObjectMapper objectMapper = new ObjectMapper();
-		if (mapToBeConverted.isEmpty()) {
-			return null;
-		}
-		return objectMapper.convertValue(mapToBeConverted, finalClass);
-		}catch(Exception e)
-		{
+			Helper.isNotNull(mapToBeConverted);
+			ObjectMapper objectMapper = new ObjectMapper();
+			if (mapToBeConverted.isEmpty()) {
+				return null;
+			}
+			return objectMapper.convertValue(mapToBeConverted, finalClass);
+		} catch (Exception e) {
 			logger.error("Exception occured while converting MapToClass", e.getCause());
 			logger.error("Exception occurred in convertMapToClass - ", e);
 		}
 		return null;
 	}
 
-	/*
-	 * Convert map to class
+	/**
+	 * Function to convert Map to Object[].  Map is converted to Object[]
 	 * 
-	 * @param java.util.Map, java.lang.Class<?>
+	 * @param mapToBeConverted Sent by calling function, to be converted to Object[]
 	 * 
-	 * @return java.lang.Object
-	 */
-	public static Object convertJsonStringToClass(String stringToBeConverted, Class<?> finalClass)
-			throws JsonParseException, JsonMappingException, IOException {
-		Helper.isNotEmpty(stringToBeConverted);
-		ObjectMapper objectMapper = new ObjectMapper();
-		if (stringToBeConverted.isEmpty()) {
-			return null;
-		}
-		return objectMapper.readValue(stringToBeConverted, finalClass);
-	}
-
-	/*
-	 * Convert map to ObjectArray
-	 * 
-	 * @param java.util.Map
-	 * 
-	 * @return java.lang.Object[]
+	 * @return Object[] is returned to calling function
 	 */
 	public static Object[] convertMapToObjectArray(Map<String, Object> mapToBeConverted) {
 		try {
-		Helper.isNotNull(mapToBeConverted);
-		Object objectArray[] = new Object[mapToBeConverted.size()];
-		int i = 0;
-		for (Map.Entry<String, Object> entry : mapToBeConverted.entrySet()) {
-			objectArray[i] = entry.getValue();
-			i++;
-		}
-		return objectArray;
-		}catch(Exception e)
-		{
+			Helper.isNotNull(mapToBeConverted);
+			Object objectArray[] = new Object[mapToBeConverted.size()];
+			int i = 0;
+			for (Map.Entry<String, Object> entry : mapToBeConverted.entrySet()) {
+				objectArray[i] = entry.getValue();
+				i++;
+			}
+			return objectArray;
+		} catch (Exception e) {
 			logger.error("Exception occured while converting MapToObjectArray", e.getCause());
 			logger.error("Exception occurred in convertMapToObjectArray - ", e);
 		}
 		return null;
-
-	}
-
-	/*
-	 * Convert List to JsonString
-	 * 
-	 * @param java.util.List
-	 * 
-	 * @return String
-	 */
-	public static String convertListToString(List<String> listToBeConverted) throws IOException {
-		Helper.isNotNull(listToBeConverted);
-		ObjectMapper objectMapper = new ObjectMapper();
-		if (listToBeConverted.isEmpty()) {
-			return null;
-		}
-		return objectMapper.writeValueAsString(listToBeConverted);
-
-	}
-
-	/*
-	 * Convert String to JSONObject
-	 * 
-	 * @param String
-	 * 
-	 * @return JSONObject
-	 */
-	public static JSONArray convertStringToJsonObject(String stringToBeConverted) throws IOException, ParseException {
-		Helper.isNotEmpty(stringToBeConverted);
-		return new JSONArray(stringToBeConverted);
 
 	}
 }

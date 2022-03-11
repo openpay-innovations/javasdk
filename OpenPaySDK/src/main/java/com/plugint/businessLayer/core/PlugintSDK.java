@@ -1,6 +1,11 @@
 package com.plugint.businessLayer.core;
 
 import java.util.Map;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.ini4j.Wini;
+
 import com.plugint.businessLayer.constant.PlugintConstants;
 import com.plugint.businessLayer.features.CapturePayment;
 import com.plugint.businessLayer.features.Limits;
@@ -12,52 +17,85 @@ import com.plugint.client.ApiClient;
 import com.plugint.client.ApiException;
 import com.plugint.client.Configuration;
 import com.plugint.client.auth.HttpBasicAuth;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.ini4j.Wini;
 
-/*
- * Base Core class to class Api Methods
+/**
+ * Business Layer Entry Class which contains all calls To SDK Request body is
+ * created in each function and sending response back to calling function.
  */
 public class PlugintSDK {
 	private static final Logger logger = Logger.getLogger(PlugintSDK.class);
 	static Class<?> sdkClass;
 
-	/*
-	 * Default constructor to authenticate api's
+	/**
+	 * Default constructor to authenticate api's. It makes call to
+	 * doAuthentication() function to set basic authentication headers
 	 */
 	public PlugintSDK() {
 		doAuthentication();
 	}
 
-	/*
-	 * GetToken method to get token for creating new orders in payment gateway
+	/**
+	 * GetToken method creates request from @param cartData and make a call to api
+	 * method in SDK layer. As this is a Generic method created to be used on
+	 * multiple platforms, Api method ([Method] section) and class([ApiClass]
+	 * section are loaded from mappingApiconfig.ini using reflections
 	 * 
-	 * @param java.util.Map
+	 * Tokenisation method basically creates a new order request
+	 *
+	 * @param cartData      It is a Map object coming from calling function which
+	 *                      contains relevant data required to make create new order
+	 *                      call with key value pair map where keys can be relevant
+	 *                      to the attributes.For creating new order you can send
+	 *                      cart data object(if it contains all relevant information
+	 *                      else send data based on shop system) in map along with
+	 *                      other fields like callbackURL,failURL etc Please refer
+	 *                      API document to check attributes related information
+	 *                      Please refer API documentation for fields related
+	 *                      information {key, value} : {String, Object}
 	 * 
-	 * @return java.lang.Object
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of map object. Calling function can use the response
+	 *         map for further implementations
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> getToken(Map<String, Object> cartData) throws Exception {
+	public Map<String, Object> getToken(final Map<String, Object> cartData, int attemptNumber) throws Exception {
 		Helper.isNotNull(cartData);
 		logger.info("GET TOKEN Call BEGINS");
 		try {
-			Map<String, Object> bodyMap = Tokenisation.createBody(cartData);
+			final Map<String, Object> bodyMap = Tokenisation.createBody(cartData);
 			if (bodyMap.isEmpty()) {
 				return null;
 			}
-			Object response = Tokenisation.sendTokenisationRequest(sdkClass, bodyMap);
+			final Object response = Tokenisation.sendTokenisationRequest(sdkClass, bodyMap);
 			if (response == null) {
 				return null;
 			}
+			logger.info("Response during create token is" + response);
 			return Util.convertObjectToMap(response);
-
-		} catch (Exception e) {
-			logger.error("Exception occured while sending tokenisation request - " + e.getMessage());
+		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
-				logger.error("Error code for getTokenisation is " + ((ApiException) e.getCause()).getCode());
-				logger.error(
-						"Error response message for getTokenisation is " + ((ApiException) e.getCause()).getMessage());
-				return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
+						logger.info("Retrying again due to timeout exception");
+						attemptNumber++;
+						return getToken(cartData, attemptNumber);
+					} else {
+						throw e;
+					}
+				} else {
+					logger.error("Error code for getTokenisation is " + ((ApiException) e.getCause()).getCode());
+					logger.error("Error response message for getTokenisation is "
+							+ ((ApiException) e.getCause()).getMessage());
+					return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				}
 			}
 			logger.error("Exception occurred in getToken method- ", e);
 			return Util.convertStringToMap(e.getMessage());
@@ -65,61 +103,125 @@ public class PlugintSDK {
 
 	}
 
-	/*
-	 * Refund function to call refund Api
+	/**
+	 * Refund method creates request from @param refundData @param orderId and make
+	 * a call to api method in SDK layer. As this is a Generic method created to be
+	 * used on multiple platforms, Api method ([Method] section) and
+	 * class([ApiClass] section are loaded from mappingApiconfig.ini using
+	 * reflections
+	 *
+	 * Refund method basically used to do refunds
+	 *
+	 * @param refundData    It is a Map object coming from calling function which
+	 *                      contains relevant data required to make refund call like
+	 *                      refundData with key value pair map where keys can be
+	 *                      relevant to the attributes.Please refer API
+	 *                      documentation for fields related information {key,
+	 *                      value} : {String, Object}
 	 * 
-	 * @param java.util.Map
+	 * @param orderId       Object contains orderId/id's to get refund for
+	 *                      particular order. Refer API document to check data types
 	 * 
-	 * @return java.util.Map
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of java.util.map object. Calling function can use
+	 *         the response map for further implementations.Please check API
+	 *         documentation for response details coming from API {key, value} :
+	 *         {String, Object}
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> refund(Map<String, Object> refundData, Object orderId) throws Exception {
+	public Map<String, Object> refund(final Map<String, Object> refundData, final Object orderId, int attemptNumber)
+			throws Exception {
 		Helper.isNotNull(refundData);
 		Helper.isNotNull(orderId);
-		logger.debug("REFUND CALL BEGINS");
+		logger.info("REFUND CALL BEGINS");
 		try {
-			Map<String, Object> bodyMap = Refund.createBody(refundData);
+			final Map<String, Object> bodyMap = Refund.createBody(refundData);
 			if (bodyMap.isEmpty()) {
 				return null;
 			}
-			Object response = Refund.sendRefundRequest(sdkClass, bodyMap, orderId);
+			final Object response = Refund.sendRefundRequest(sdkClass, bodyMap, orderId);
 			if (response == null) {
 				return null;
 			}
+			logger.info("Response during refund request is" + response);
 			return Util.convertObjectToMap(response);
-
-		} catch (Exception e) {
-			logger.error("Exception occured while sending refund request - " + e.getMessage());
+		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
-				logger.error("Error code for refund is " + ((ApiException) e.getCause()).getCode());
-				logger.error("Error response message for refund is " + ((ApiException) e.getCause()).getResponseBody());
-				return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
+						logger.info("Retrying again due to timeout exception");
+						attemptNumber++;
+						return refund(refundData, orderId, attemptNumber);
+					} else {
+						throw e;
+					}
+				} else {
+					logger.error("Error code for refund is " + ((ApiException) e.getCause()).getCode());
+					logger.error(
+							"Error response message for refund is " + ((ApiException) e.getCause()).getResponseBody());
+					return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				}
 			}
 			logger.error("Exception occurred in refund method- ", e);
 			return Util.convertStringToMap(e.getMessage());
 		}
 	}
 
-	/*
-	 * GetLimit Function
+	/**
+	 * GetPSPConfig method make a call to api method in SDK layer. As this is a
+	 * Generic method created to be used on multiple platforms, Api method ([Method]
+	 * section) and class([ApiClass] section are loaded from mappingApiconfig.ini
+	 * using reflections
+	 *
+	 * GetPSPConfig method basically used to set price limits for purchase
 	 * 
-	 * @return java.Util.Map
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of map object. Calling function can use the response
+	 *         map for further implementations
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> getPSPConfig() throws Exception {
+	public Map<String, Object> getPSPConfig(int attemptNumber) throws Exception {
 		logger.info("LIMIT CONFIG CALL BEGINS");
 		try {
-			Object response = Limits.getLimits(sdkClass);
+			final Object response = Limits.getLimits(sdkClass);
 			if (response == null) {
 				return null;
 			}
+			logger.info("Response during get limits configured is" + response);
 			return Util.convertObjectToMap(response);
-		} catch (Exception e) {
-			logger.error("Exception occured while getting limits - " + e.getMessage());
+		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
-				logger.error("Error code for getLimits is " + ((ApiException) e.getCause()).getCode());
-				logger.error(((ApiException) e.getCause()).getMessage());
-				logger.error(
-						"Error response message for getLimits is " + ((ApiException) e.getCause()).getResponseBody());
-				return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
+						logger.info("Retrying again due to timeout exception");
+						attemptNumber++;
+						return getPSPConfig(attemptNumber);
+					} else {
+						throw e;
+					}
+				} else {
+					logger.error("Error code for getLimits is " + ((ApiException) e.getCause()).getCode());
+					logger.error(((ApiException) e.getCause()).getMessage());
+					logger.error("Error response message for getLimits is "
+							+ ((ApiException) e.getCause()).getResponseBody());
+					return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				}
 			}
 			logger.error("Exception occurred in getLimits function- ", e);
 			return Util.convertStringToMap(e.getMessage());
@@ -127,53 +229,110 @@ public class PlugintSDK {
 
 	}
 
-	/*
-	 * GetOrders Function
+	/**
+	 * UpdateShopOrder method creates request from @param orderId and make a call to
+	 * api method in SDK layer. As this is a Generic method created to be used on
+	 * multiple platforms, Api method ([Method] section) and class([ApiClass]
+	 * section are loaded from mappingApiconfig.ini using reflections
+	 *
+	 * UpdateShopOrder basically update particular order in third party system
 	 * 
-	 * @return java.Util.Map
+	 * @param orderId       Object contains orderId/id's to get refund for
+	 *                      particular order.Refer API document to check data types
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of map object. Calling function can use the response
+	 *         map for further implementations
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> updateShopOrder(Object orderId) throws Exception {
+	public Map<String, Object> updateShopOrder(final Object orderId, int attemptNumber) throws Exception {
 		Helper.isNotNull(orderId);
 		logger.info("UPDATING SHOP ORDERS");
 		try {
-			Object response = Orders.getOrders(sdkClass, orderId);
+			final Object response = Orders.getOrders(sdkClass, orderId);
 			if (response == null) {
 				return null;
 			}
+			logger.info("Response during order details is" + response);
 			return Util.convertObjectToMap(response);
-		} catch (Exception e) {
-			logger.error("Exception occured while getting orders - " + e.getMessage());
+		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
-				logger.error("Error code for getOrders is " + ((ApiException) e.getCause()).getCode());
-				logger.error("Error response message for getOrders is " + ((ApiException) e.getCause()).getMessage());
-				return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
+						logger.info("Retrying again due to timeout exception");
+						attemptNumber++;
+						return updateShopOrder(orderId, attemptNumber);
+					} else {
+						throw e;
+					}
+				} else {
+					logger.error("Error code for getOrders is " + ((ApiException) e.getCause()).getCode());
+					logger.error(
+							"Error response message for getOrders is " + ((ApiException) e.getCause()).getMessage());
+					return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				}
 			}
 			logger.error("Exception occurred in getOrders function- ", e);
 			return Util.convertStringToMap(e.getMessage());
 		}
 	}
 
-	/*
-	 * capture payment Function
+	/**
+	 * CapturePayment method creates request from @param orderId and make a call to
+	 * api method in SDK layer. As this is a Generic method created to be used on
+	 * multiple platforms, Api method ([Method] section) and class([ApiClass]
+	 * section are loaded from mappingApiconfig.ini using reflections
+	 *
+	 * Capture payment basically confirms captures the payment in third party system
 	 * 
-	 * @return java.Util.Map
+	 * @param orderId       Object contains orderId/id's to get refund for
+	 *                      particular order.Refer API document to check data types
+	 * @param attemptNumber Integer to be sent from calling function (of shop
+	 *                      system) with constant value as 1.This attribute is used
+	 *                      as counter to check number of attempts made for
+	 *                      retrying.
+	 *
+	 * @return Response in form of map object. Calling function can use the response
+	 *         map for further implementations
+	 * 
+	 * @throws Exception Generic Exception which is parent class and can handle
+	 *                   multiple exceptions all together, main exception coming
+	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> capturePayment(Object orderId) throws Exception {
+	public Map<String, Object> capturePayment(final Object orderId, int attemptNumber) throws Exception {
 		Helper.isNotNull(orderId);
 		logger.info("CAPTURING PAYMENT");
 		try {
-			Object response = CapturePayment.capturePayment(sdkClass, orderId);
+			final Object response = CapturePayment.capturePayment(sdkClass, orderId);
 			if (response == null) {
 				return null;
 			}
+			logger.info("Response during capture payment is" + response);
 			return Util.convertObjectToMap(response);
-		} catch (Exception e) {
-			logger.error("Exception occured while capturing payments - " + e.getMessage());
+		} catch (final Exception e) {
 			if (e.getCause() instanceof ApiException) {
-				logger.error("Error code for capturing payments is " + ((ApiException) e.getCause()).getCode());
-				logger.error("Error response message for capturing payments is "
-						+ ((ApiException) e.getCause()).getMessage());
-				return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				if (((ApiException) e.getCause()).getMessage().contains("java.net.SocketTimeoutException")) {
+					int maxRetry = Helper.getMaxRetryValue();
+					if (attemptNumber <= maxRetry) {
+						logger.info("Retrying again due to timeout exception");
+						attemptNumber++;
+						return capturePayment(orderId, attemptNumber);
+					} else {
+						throw e;
+					}
+				} else {
+					logger.error("Error code for capturing payments is " + ((ApiException) e.getCause()).getCode());
+					logger.error("Error response message for capturing payments is "
+							+ ((ApiException) e.getCause()).getMessage());
+					return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
+				}
 			}
 			logger.error("Exception occurred in capture payment- ", e);
 			return Util.convertStringToMap(e.getMessage());
@@ -181,27 +340,32 @@ public class PlugintSDK {
 		}
 	}
 
-	/*
-	 * Method to do authentication
+	/**
+	 * This method is basically called in constructor method to set authentication
+	 * parameters in header for each API call. UserName and password are fetch from
+	 * merchantConfig.ini
 	 * 
+	 * sdkClass is global param which sets the value API class to be called from SDK
+	 * layer from [ApiClass] section of mappingAPIConfig.ini
+	 *
 	 */
 	public static void doAuthentication() {
 		try {
 			BasicConfigurator.configure();
-			ApiClient defaultClient = Configuration.getDefaultApiClient();
+			final ApiClient defaultClient = Configuration.getDefaultApiClient();
 			// Configure HTTP basic authorization: Basic auth
-			HttpBasicAuth basicAuth = (HttpBasicAuth) defaultClient.getAuthentication("Basic auth");
-			Wini configFile = ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
-			String userName = Helper.loadPropertyValue(configFile, PlugintConstants.USER,
+			final HttpBasicAuth basicAuth = (HttpBasicAuth) defaultClient.getAuthentication("Basic auth");
+			final Wini configFile = ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
+			final String userName = Helper.loadPropertyValue(configFile, PlugintConstants.USER,
 					PlugintConstants.AUTHENTICATION);
 			basicAuth.setUsername(userName);
-			String password = Helper.loadPropertyValue(configFile, PlugintConstants.PASSWORD,
+			final String password = Helper.loadPropertyValue(configFile, PlugintConstants.PASSWORD,
 					PlugintConstants.AUTHENTICATION);
 			basicAuth.setPassword(password);
-			String sdkClassString = Helper.loadPropertyValue(configFile, PlugintConstants.API_CLASS_KEY,
-					PlugintConstants.API_CLASS_SECTION);
+			final String sdkClassString = Helper.loadPropertyValue(Helper.loadApiConfigFile(),
+					PlugintConstants.API_CLASS_KEY, PlugintConstants.API_CLASS_SECTION);
 			sdkClass = Class.forName(sdkClassString);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			logger.error("Exception occured during authentication");
 			logger.error("Exception occurred in constructor while authenticating- ", e);
 		}

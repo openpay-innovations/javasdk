@@ -12,29 +12,26 @@ import org.junit.runners.JUnit4;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.plugint.businessLayer.constant.PlugintConstants;
 import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.core.PlugintSDK;
 import com.plugint.businessLayer.util.Util;
 import com.plugint.client.ApiException;
 
-/*
- * Post Order Negative test class
+/**
+ * Post order test class is created to create new order request using negative
+ * test data or wrong test data
  */
 @RunWith(JUnit4.class)
 public class PlugintSDKNegativeOrderPostTest {
-	
+
 	private static final Logger logger = Logger.getLogger(PlugintSDKNegativeOrderPostTest.class);
 	private final PlugintSDK sdk = new PlugintSDK();
-	
+
 	/**
-	 * Requests creation of a new order.
-	 *
-	 * 
-	 *
-	 * @throws ApiException         if the Api call fails
-	 * @throws IOException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
+	 * Requests creation of a new order. This is negative test case to fail the
+	 * creation of new order using wrong test data from
+	 * testData/getTokenNegative.json
 	 */
 	@Test
 	public void ordersPostTestNegative() {
@@ -43,7 +40,7 @@ public class PlugintSDKNegativeOrderPostTest {
 			String createNewOrderJsonStr = Helper.readJson("testData/getTokenNegative.json");
 			body = Util.convertStringToMap(createNewOrderJsonStr);
 			assertNotNull("Converted request map cannot be null", body);
-			Map<String, Object> response = sdk.getToken(body);
+			Map<String, Object> response = sdk.getToken(body,1);
 			assertNotNull("Response map for create new order cannot be null", response);
 			logger.info("Response with error body due to wrong test data" + response);
 		} catch (Exception e) {

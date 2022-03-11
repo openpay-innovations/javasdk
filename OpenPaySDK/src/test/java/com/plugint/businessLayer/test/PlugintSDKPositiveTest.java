@@ -18,8 +18,11 @@ import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.util.Util;
 import com.plugint.client.ApiException;
 
+import junit.framework.Assert;
+
 /**
- * API tests for SDK
+ * API tests cases are handled for positive test data. All positive test cases
+ * are handled in this class
  */
 @RunWith(JUnit4.class)
 public class PlugintSDKPositiveTest {
@@ -30,17 +33,13 @@ public class PlugintSDKPositiveTest {
 	/**
 	 * Gets the configured minimum and maximum purchase price for orders with the
 	 * authenticated retailer
-	 *
-	 * 
-	 *
-	 * @throws Exception if the Api call fails
 	 */
 	@Test
 	public void ordersLimitsGetTest() {
 
 		Map<String, Object> response;
 		try {
-			response = sdk.getPSPConfig();
+			response = sdk.getPSPConfig(1);
 			assertNotNull("Response for get Limit api cannot be null", response);
 			assertNotNull(response.get("minPrice"));
 			assertNotNull(response.get("maxPrice"));
@@ -52,30 +51,31 @@ public class PlugintSDKPositiveTest {
 	}
 
 	/**
-	 * Requests creation of a new order.
+	 * Requests creation of a new order. Request data is loaded from
+	 * testData/getTokenPositive.json. After successful API call its automatically
+	 * redirected to chrome browser to complete further purchase steps to thrid
+	 * party by using redirect URL value from mappingApiConfig.ini.Once successful
+	 * purchase is completed browser will be closed automatically after certain
+	 * timeout value which is configured in merchantConfig.ini. The positive order
+	 * id is stored in testData/testOrderPositive.txt and further calls are made to
+	 * capture payment, check order status and do refund.
 	 *
-	 * 
-	 *
-	 * @throws ApiException         if the Api call fails
-	 * @throws IOException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
 	 */
 
 	@Test
 	public void ordersPostTestPositive() {
 		Map<String, Object> body = new HashMap<String, Object>();
 		try {
-			Wini configFileName = ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
+			Wini configFileName = Helper.loadApiConfigFile();
 			String createNewOrderJsonStr = Helper.readJson("testData/getTokenPositive.json");
 			body = Util.convertStringToMap(createNewOrderJsonStr);
 			assertNotNull("Converted request map cannot be null", body);
-			Map<String, Object> response = sdk.getToken(body);
+			Map<String, Object> response = sdk.getToken(body,1);
 			assertNotNull("Response map for create new order cannot be null", response);
-			String transactionToken = Helper.getTransactionTokenTest(response);
+			String transactionToken = HelperTest.getTransactionTokenTest(response);
 			String redirecturl = Helper.loadPropertyValue(configFileName, PlugintConstants.REDIRECTURL,
 					PlugintConstants.REDIRECTURLSECTION) + transactionToken;
-			Helper.redirectToBrowser(redirecturl);
+			HelperTest.redirectToBrowser(redirecturl);
 			assertNotNull("order id cannot be null", response.get("orderId"));
 			orderId = (String) response.get("orderId");
 			Helper.usingBufferedWritter("testData/testOrderPositive.txt", orderId);
@@ -83,7 +83,6 @@ public class PlugintSDKPositiveTest {
 			logger.info("Capturing payment");
 			ordersOrderIdCapturePostTestPositive();
 			ordersOrderIdGetTestPositive();
-			ordersOrderIdRefundPostTestPositive();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			logger.error(e);
@@ -92,17 +91,13 @@ public class PlugintSDKPositiveTest {
 
 	/**
 	 * Requests that the payment for an order is captured.
-	 *
-	 * 
-	 *
-	 * @throws ApiException if the Api call fails
 	 */
 	public void ordersOrderIdCapturePostTestPositive() {
 		try {
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			assertNotNull("Order Id cannot be null", orderId);
 			Map<String, Object> response;
-			response = sdk.capturePayment(orderId);
+			response = sdk.capturePayment(orderId,1);
 			assertNotNull("Response map for create new order cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {
@@ -113,41 +108,14 @@ public class PlugintSDKPositiveTest {
 
 	/**
 	 * Gets an order by order id.
-	 *
-	 * 
-	 *
-	 * @throws ApiException if the Api call fails
 	 */
 	public void ordersOrderIdGetTestPositive() {
 		try {
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			assertNotNull("Order Id cannot be null", orderId);
 			Map<String, Object> response;
-			response = sdk.updateShopOrder(orderId);
+			response = sdk.updateShopOrder(orderId,1);
 			assertNotNull("Response map for get orders cannot be null", response);
-			logger.info(response);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			logger.error(e);
-		}
-	}
-
-	/**
-	 * Requests that an order is partially or fully refunded.
-	 *
-	 * 
-	 *
-	 * @throws Exception if the Api call fails
-	 */
-	public void ordersOrderIdRefundPostTestPositive() {
-		try {
-			String orderId = Helper.readText("testData/testOrderPositive.txt");
-			String requestJson = Helper.readJson("testData/getRefundPositive.json");
-			assertNotNull("Request body for refund cannot be null", Util.convertStringToMap(requestJson));
-			assertNotNull("Order id for refund cannot be null", orderId);
-			Map<String, Object> response;
-			response = sdk.refund(Util.convertStringToMap(requestJson), orderId);
-			assertNotNull("Response map for refund cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {
 			logger.error(e.getMessage());

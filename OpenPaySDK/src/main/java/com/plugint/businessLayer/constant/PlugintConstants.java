@@ -1,15 +1,18 @@
 package com.plugint.businessLayer.constant;
 
-/*
- * Constant class
+/**
+ * Constant class with all the text,string used mostly are properties keys
+ * loading from merchantConfig.ini, mappingApiConfig.ini and
+ * mappingShopConfig.ini
  */
 public class PlugintConstants {
-	public static final String CONFIG_FILE = "config/config.ini";
-	public static final String MAPPING_SHOP_FILE = "config/mappingShopConfig.ini";
-	public static final String MAPPING_API_FILE = "config/mappingApiConfig.ini";
+	public static final String CONFIG_FILE = "merchantConfig.ini";
+	public static final String MAPPING_SHOP_FILE = "mappingShopConfig.ini";
+	public static final String MAPPING_API_FILE = "mappingApiConfig.ini";
 	public static final String TOKEN_REQUEST_MODEL = "tokenRequestModel";
 	public static final String API_MODELS = "ApiModels";
 	public static final String METHODS = "Methods";
+	public static final String CREATE_ORDER_SECTION = "createOrder";
 	public static final String TOKENISATION_METHOD = "tokenisationMethod";
 	public static final String REFUND_PARAMETER = "refundRequestParameterType";
 	public static final String REFUND_METHOD = "refundMethod";
@@ -32,4 +35,8 @@ public class PlugintConstants {
 	public static final String REDIRECTURLSECTION = "RedirectURL";
 	public static final String ENDPOINTSECTION = "EndPointURL";
 	public static final String ENDPOINTURL = "endpointUrl";
+	public static final String APIRETRYSECTION = "APIRetry";
+	public static final String APIRETRYVALUE = "retryCount";
+	public static final String CREATE_ORDER_PRICE_FORMATTING_SECTION = "CreateOrderPriceFormatting";
+	
 }
