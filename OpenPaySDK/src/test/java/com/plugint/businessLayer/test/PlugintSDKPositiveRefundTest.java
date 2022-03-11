@@ -28,7 +28,7 @@ public class PlugintSDKPositiveRefundTest {
 	@Test
 	public void ordersOrderIdRefundPostTestPositive() {
 		try {
-			PlugintSDK sdk = new PlugintSDK();
+			PlugintSDK sdk = new PlugintSDK("OP 3340","EC3C629D-CF23-4045-A07A-38A21D39AC16","https://api.training.myopenpay.com.au/v1/merchant","1.20210320");
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			String requestJson = Helper.readJson("testData/getRefundPositive.json");
 			assertNotNull("Request body for refund cannot be null", Util.convertStringToMap(requestJson));

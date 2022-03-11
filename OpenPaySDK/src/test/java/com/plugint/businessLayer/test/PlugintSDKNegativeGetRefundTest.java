@@ -20,7 +20,7 @@ import com.plugint.businessLayer.util.Util;
 @RunWith(JUnit4.class)
 public class PlugintSDKNegativeGetRefundTest {
 	private static final Logger logger = Logger.getLogger(PlugintSDKNegativeGetRefundTest.class);
-	private final PlugintSDK sdk = new PlugintSDK();
+	private final PlugintSDK sdk = new PlugintSDK("OP 3340","EC3C629D-CF23-4045-A07A-38A21D39AC16","https://api.training.myopenpay.com.au/v1/merchant","1.20210320");
 
 	/**
 	 * Requests that an order is partially or fully refunded. This is negative test

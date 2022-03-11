@@ -42,6 +42,9 @@ public class IntegrationApiModelsCommandsCreateOrder {
 
   @SerializedName("retailerOrderNo")
   private String retailerOrderNo = null;
+  
+  @SerializedName("source")
+  private String source = null;
 
   @SerializedName("cart")
   private List<IntegrationApiModelsCommandsCartItem> cart = null;
@@ -104,6 +107,11 @@ public class IntegrationApiModelsCommandsCreateOrder {
     this.retailerOrderNo = retailerOrderNo;
     return this;
   }
+  
+  public IntegrationApiModelsCommandsCreateOrder source(String source) {
+	this.source = source;
+	return this;
+	  }
 
    /**
    * A retailer reference (e.g. invoice) number for this order
@@ -116,6 +124,19 @@ public class IntegrationApiModelsCommandsCreateOrder {
 
   public void setRetailerOrderNo(String retailerOrderNo) {
     this.retailerOrderNo = retailerOrderNo;
+  }
+  
+  /**
+   * Name of ecommerce/POS platform request is coming from
+   * @return source
+  **/
+  @Schema(description = "Name of ecommerce/POS platform request is coming from")
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
   }
 
   public IntegrationApiModelsCommandsCreateOrder cart(List<IntegrationApiModelsCommandsCartItem> cart) {
@@ -157,13 +178,14 @@ public class IntegrationApiModelsCommandsCreateOrder {
     return Objects.equals(this.customerJourney, integrationApiModelsCommandsCreateOrder.customerJourney) &&
         Objects.equals(this.goodsDescription, integrationApiModelsCommandsCreateOrder.goodsDescription) &&
         Objects.equals(this.purchasePrice, integrationApiModelsCommandsCreateOrder.purchasePrice) &&
-        Objects.equals(this.retailerOrderNo, integrationApiModelsCommandsCreateOrder.retailerOrderNo) &&
+        Objects.equals(this.retailerOrderNo, integrationApiModelsCommandsCreateOrder.retailerOrderNo) && 
+        Objects.equals(this.source, integrationApiModelsCommandsCreateOrder.source) &&
         Objects.equals(this.cart, integrationApiModelsCommandsCreateOrder.cart);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(customerJourney, goodsDescription, purchasePrice, retailerOrderNo, cart);
+    return Objects.hash(customerJourney, goodsDescription, purchasePrice, retailerOrderNo, cart, source);
   }
 
 
@@ -176,7 +198,8 @@ public class IntegrationApiModelsCommandsCreateOrder {
     sb.append("    goodsDescription: ").append(toIndentedString(goodsDescription)).append("\n");
     sb.append("    purchasePrice: ").append(toIndentedString(purchasePrice)).append("\n");
     sb.append("    retailerOrderNo: ").append(toIndentedString(retailerOrderNo)).append("\n");
-    sb.append("    cart: ").append(toIndentedString(cart)).append("\n");
+    sb.append("    retailerOrderNo: ").append(toIndentedString(retailerOrderNo)).append("\n");
+    sb.append("    source: ").append(toIndentedString(source)).append("\n");
     sb.append("}");
     return sb.toString();
   }

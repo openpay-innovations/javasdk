@@ -51,6 +51,9 @@ public class IntegrationApiModelsCommandsOnlineJourneyDetails {
 
   @SerializedName("deliveryDate")
   private String deliveryDate = null;
+  
+  @SerializedName("deliveryMethod")
+  private String deliveryMethod = null;
 
   public IntegrationApiModelsCommandsOnlineJourneyDetails callbackUrl(String callbackUrl) {
     this.callbackUrl = callbackUrl;
@@ -182,6 +185,11 @@ public class IntegrationApiModelsCommandsOnlineJourneyDetails {
     this.deliveryDate = deliveryDate;
     return this;
   }
+  
+  public IntegrationApiModelsCommandsOnlineJourneyDetails deliveryMethod(String deliveryMethod) {
+	    this.deliveryMethod = deliveryMethod;
+	    return this;
+	  }
 
    /**
    * The date for which the delivery is scheduled
@@ -194,6 +202,19 @@ public class IntegrationApiModelsCommandsOnlineJourneyDetails {
 
   public void setDeliveryDate(String deliveryDate) {
     this.deliveryDate = deliveryDate;
+  }
+  
+  /**
+   * If Click and Collect is selected on Checkout, please set deliveryMethod to "Pickup" and pass the store address in the "deliveryAddress" fields. If the digital services are provided to the customers where goods are not delivered to any physical address, please set "Email" that applies to digital goods. Merchant is not required to pass the "deliveryAddress"
+   * @return DeliveryMethod
+  **/
+  @Schema(description = "The date for which the delivery is scheduled")
+  public String getDeliveryMethod() {
+    return deliveryMethod;
+  }
+
+  public void setDeliveryMethod(String deliveryMethod) {
+    this.deliveryMethod = deliveryMethod;
   }
 
 
@@ -213,7 +234,8 @@ public class IntegrationApiModelsCommandsOnlineJourneyDetails {
         Objects.equals(this.chargeBackCount, integrationApiModelsCommandsOnlineJourneyDetails.chargeBackCount) &&
         Objects.equals(this.customerQuality, integrationApiModelsCommandsOnlineJourneyDetails.customerQuality) &&
         Objects.equals(this.customerDetails, integrationApiModelsCommandsOnlineJourneyDetails.customerDetails) &&
-        Objects.equals(this.deliveryDate, integrationApiModelsCommandsOnlineJourneyDetails.deliveryDate);
+        Objects.equals(this.deliveryDate, integrationApiModelsCommandsOnlineJourneyDetails.deliveryDate) &&
+        Objects.equals(this.deliveryMethod, integrationApiModelsCommandsOnlineJourneyDetails.deliveryMethod);
   }
 
   @Override
@@ -235,6 +257,7 @@ public class IntegrationApiModelsCommandsOnlineJourneyDetails {
     sb.append("    customerQuality: ").append(toIndentedString(customerQuality)).append("\n");
     sb.append("    customerDetails: ").append(toIndentedString(customerDetails)).append("\n");
     sb.append("    deliveryDate: ").append(toIndentedString(deliveryDate)).append("\n");
+    sb.append("    deliveryMethod: ").append(toIndentedString(deliveryMethod)).append("\n");
     sb.append("}");
     return sb.toString();
   }

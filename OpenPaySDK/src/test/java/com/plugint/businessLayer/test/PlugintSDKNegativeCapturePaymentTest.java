@@ -10,6 +10,7 @@ import org.junit.runners.JUnit4;
 import com.plugint.businessLayer.constant.PlugintConstants;
 import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.core.PlugintSDK;
+import com.plugint.businessLayer.util.Util;
 import com.plugint.client.ApiException;
 
 /**
@@ -20,7 +21,7 @@ import com.plugint.client.ApiException;
 public class PlugintSDKNegativeCapturePaymentTest {
 
 	private static final Logger logger = Logger.getLogger(PlugintSDKNegativeCapturePaymentTest.class);
-	private final PlugintSDK sdk = new PlugintSDK();
+	private final PlugintSDK sdk = new PlugintSDK("OP 3340","EC3C629D-CF23-4045-A07A-38A21D39AC16","https://api.training.myopenpay.com.au/v1/merchant","1.20210320");
 
 	/**
 	 * Requests that the payment for an order is captured.Testing negative test case
@@ -34,7 +35,9 @@ public class PlugintSDKNegativeCapturePaymentTest {
 		try {
 			String orderId = Helper.readText("testData/testOrderNegative.txt");
 			Map<String, Object> response;
-			response = sdk.capturePayment(orderId,1);
+			String requestJson = Helper.readJson("testData/capturePayment.json");
+			assertNotNull("Request body for capture payment cannot be null", Util.convertStringToMap(requestJson));
+			response = sdk.capturePayment(orderId, Util.convertStringToMap(requestJson),1);
 			assertNotNull("Response map for create new order cannot be null", response);
 			logger.info("Response with error body due to wrong test data" + response);
 		} catch (Exception e) {

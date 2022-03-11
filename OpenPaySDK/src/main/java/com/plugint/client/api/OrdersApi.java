@@ -25,7 +25,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 
-
+import com.plugint.client.model.IntegrationApiModelsCommandsCapturePayment;
 import com.plugint.client.model.IntegrationApiModelsCommandsCreateOrder;
 import com.plugint.client.model.IntegrationApiModelsCommandsRefund;
 import com.plugint.client.model.IntegrationApiModelsLimits;
@@ -67,7 +67,7 @@ public class OrdersApi {
         Object localVarPostBody = null;
         
         // create path and map variables
-        String localVarPath = "/orders/limits";
+        String localVarPath = "/orders/limits?origin=online";
 
         List<Pair> localVarQueryParams = new ArrayList<Pair>();
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
@@ -300,16 +300,17 @@ public class OrdersApi {
     /**
      * Build call for ordersOrderIdCapturePost
      * @param orderId The Order ID that was returned when the order was created (required)
+     * @param body(optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call ordersOrderIdCapturePostCall(String orderId, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
-        Object localVarPostBody = null;
+    public com.squareup.okhttp.Call ordersOrderIdCapturePostCall(String orderId, IntegrationApiModelsCommandsCapturePayment body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = body;
         
         // create path and map variables
-        String localVarPath = "/orders/{orderId}/capture"
+        String localVarPath = "/orders/{orderId}/capturepayment"
             .replaceAll("\\{" + "orderId" + "\\}", apiClient.escapeString(orderId.toString()));
 
         List<Pair> localVarQueryParams = new ArrayList<Pair>();
@@ -348,13 +349,13 @@ public class OrdersApi {
     }
     
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call ordersOrderIdCapturePostValidateBeforeCall(String orderId, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call ordersOrderIdCapturePostValidateBeforeCall(String orderId, IntegrationApiModelsCommandsCapturePayment body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         // verify the required parameter 'orderId' is set
         if (orderId == null) {
             throw new ApiException("Missing the required parameter 'orderId' when calling ordersOrderIdCapturePost(Async)");
         }
         
-        com.squareup.okhttp.Call call = ordersOrderIdCapturePostCall(orderId, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = ordersOrderIdCapturePostCall(orderId, body, progressListener, progressRequestListener);
         return call;
 
         
@@ -370,8 +371,8 @@ public class OrdersApi {
      * @return IntegrationApiModelsOrder
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public IntegrationApiModelsOrder ordersOrderIdCapturePost(String orderId) throws ApiException {
-        ApiResponse<IntegrationApiModelsOrder> resp = ordersOrderIdCapturePostWithHttpInfo(orderId);
+    public IntegrationApiModelsOrder ordersOrderIdCapturePost(String orderId, IntegrationApiModelsCommandsCapturePayment body) throws ApiException {
+        ApiResponse<IntegrationApiModelsOrder> resp = ordersOrderIdCapturePostWithHttpInfo(orderId, body);
         return resp.getData();
     }
 
@@ -382,8 +383,8 @@ public class OrdersApi {
      * @return ApiResponse&lt;IntegrationApiModelsOrder&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<IntegrationApiModelsOrder> ordersOrderIdCapturePostWithHttpInfo(String orderId) throws ApiException {
-        com.squareup.okhttp.Call call = ordersOrderIdCapturePostValidateBeforeCall(orderId, null, null);
+    public ApiResponse<IntegrationApiModelsOrder> ordersOrderIdCapturePostWithHttpInfo(String orderId, IntegrationApiModelsCommandsCapturePayment body) throws ApiException {
+        com.squareup.okhttp.Call call = ordersOrderIdCapturePostValidateBeforeCall(orderId, body, null, null);
         Type localVarReturnType = new TypeToken<IntegrationApiModelsOrder>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -392,11 +393,12 @@ public class OrdersApi {
      * Requests that the payment for an order is captured. (asynchronously)
      * 
      * @param orderId The Order ID that was returned when the order was created (required)
+     * @param body(optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call ordersOrderIdCapturePostAsync(String orderId, final ApiCallback<IntegrationApiModelsOrder> callback) throws ApiException {
+    public com.squareup.okhttp.Call ordersOrderIdCapturePostAsync(String orderId,IntegrationApiModelsCommandsCapturePayment body, final ApiCallback<IntegrationApiModelsOrder> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -417,7 +419,7 @@ public class OrdersApi {
             };
         }
 
-        com.squareup.okhttp.Call call = ordersOrderIdCapturePostValidateBeforeCall(orderId, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = ordersOrderIdCapturePostValidateBeforeCall(orderId, body, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<IntegrationApiModelsOrder>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;

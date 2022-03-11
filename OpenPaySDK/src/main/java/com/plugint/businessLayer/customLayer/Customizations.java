@@ -70,10 +70,9 @@ public class Customizations {
 		String priceDenominationValue = Helper.loadPropertyValue(configShopFile, "denominationValue",
 				"PriceFormattingFields");
 		Helper.isNotEmpty(priceDenominationValue);
-		double priceToBeUpdated = new Double(shopSystemRequestMapValue.toString())
-				* Double.parseDouble(priceDenominationValue);
+		float priceToBeUpdated = Float.parseFloat(shopSystemRequestMapValue.toString()) * Integer.parseInt(priceDenominationValue);
 		Helper.isNotNull(priceToBeUpdated);
-		return (int) priceToBeUpdated;
+		return  priceToBeUpdated;
 	}
 
 }
