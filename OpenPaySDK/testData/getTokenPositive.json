@@ -7,6 +7,9 @@
    "customerQuality":-1,
    "code":"00015001",
    "emailAddress":"ecommerce@xx.yy",
+   "phoneNumber":"99999999999",
+   "source":"SFCC",
+   "deliveryMethod":"Delivery",
    "net":false,
    "totalPriceWithTax":{
       "currencyIso":"USD",

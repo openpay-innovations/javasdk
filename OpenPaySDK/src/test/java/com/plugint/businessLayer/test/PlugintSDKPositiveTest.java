@@ -1,6 +1,5 @@
 package com.plugint.businessLayer.test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
@@ -9,16 +8,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import static org.junit.Assert.*;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+
 import com.plugint.businessLayer.core.PlugintSDK;
 import com.plugint.businessLayer.constant.PlugintConstants;
-import com.plugint.businessLayer.core.ControllerIni;
+
 import com.plugint.businessLayer.core.Helper;
 import com.plugint.businessLayer.util.Util;
-import com.plugint.client.ApiException;
 
-import junit.framework.Assert;
 
 /**
  * API tests cases are handled for positive test data. All positive test cases
@@ -27,7 +23,7 @@ import junit.framework.Assert;
 @RunWith(JUnit4.class)
 public class PlugintSDKPositiveTest {
 	private static final Logger logger = Logger.getLogger(PlugintSDKPositiveTest.class);
-	private final PlugintSDK sdk = new PlugintSDK();
+	private final PlugintSDK sdk = new PlugintSDK("OP 3340","EC3C629D-CF23-4045-A07A-38A21D39AC16","https://api.training.myopenpay.com.au/v1/merchant","1.20210320");
 	private static String orderId;
 
 	/**
@@ -36,7 +32,6 @@ public class PlugintSDKPositiveTest {
 	 */
 	@Test
 	public void ordersLimitsGetTest() {
-
 		Map<String, Object> response;
 		try {
 			response = sdk.getPSPConfig(1);
@@ -96,8 +91,10 @@ public class PlugintSDKPositiveTest {
 		try {
 			String orderId = Helper.readText("testData/testOrderPositive.txt");
 			assertNotNull("Order Id cannot be null", orderId);
+			String requestJson = Helper.readJson("testData/capturePayment.json");
+			assertNotNull("Request body for capture payment cannot be null", Util.convertStringToMap(requestJson));
 			Map<String, Object> response;
-			response = sdk.capturePayment(orderId,1);
+			response = sdk.capturePayment(orderId,Util.convertStringToMap(requestJson),1);
 			assertNotNull("Response map for create new order cannot be null", response);
 			logger.info(response);
 		} catch (Exception e) {

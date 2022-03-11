@@ -26,7 +26,7 @@ import com.plugint.client.ApiException;
 public class PlugintSDKNegativeOrderPostTest {
 
 	private static final Logger logger = Logger.getLogger(PlugintSDKNegativeOrderPostTest.class);
-	private final PlugintSDK sdk = new PlugintSDK();
+	private final PlugintSDK sdk = new PlugintSDK("OP 3340","EC3C629D-CF23-4045-A07A-38A21D39AC16","https://api.training.myopenpay.com.au/v1/merchant","1.20210320");
 
 	/**
 	 * Requests creation of a new order. This is negative test case to fail the

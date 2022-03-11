@@ -30,8 +30,12 @@ public class PlugintSDK {
 	 * Default constructor to authenticate api's. It makes call to
 	 * doAuthentication() function to set basic authentication headers
 	 */
-	public PlugintSDK() {
-		doAuthentication();
+	public PlugintSDK(String userName, String password, String endPointUrl, String version) {
+		Helper.isNotEmpty(userName);
+		Helper.isNotEmpty(password);
+		Helper.isNotEmpty(endPointUrl);
+		Helper.isNotEmpty(version);
+		doAuthentication(userName,password,endPointUrl,version);
 	}
 
 	/**
@@ -93,7 +97,7 @@ public class PlugintSDK {
 				} else {
 					logger.error("Error code for getTokenisation is " + ((ApiException) e.getCause()).getCode());
 					logger.error("Error response message for getTokenisation is "
-							+ ((ApiException) e.getCause()).getMessage());
+							+ ((ApiException) e.getCause()).getResponseBody().toString());
 					return Util.convertStringToMap(((ApiException) e.getCause()).getResponseBody());
 				}
 			}
@@ -294,6 +298,12 @@ public class PlugintSDK {
 	 * 
 	 * @param orderId       Object contains orderId/id's to get refund for
 	 *                      particular order.Refer API document to check data types
+	 * @param captureData    It is a Map object coming from calling function which
+	 *                      contains relevant data required to make capture call like
+	 *                      captureData with key value pair map where keys can be
+	 *                      relevant to the attributes.Please refer API
+	 *                      documentation for fields related information {key,
+	 *                      value} : {String, Object}
 	 * @param attemptNumber Integer to be sent from calling function (of shop
 	 *                      system) with constant value as 1.This attribute is used
 	 *                      as counter to check number of attempts made for
@@ -306,11 +316,16 @@ public class PlugintSDK {
 	 *                   multiple exceptions all together, main exception coming
 	 *                   from API is custom Exception named as APIException
 	 */
-	public Map<String, Object> capturePayment(final Object orderId, int attemptNumber) throws Exception {
+	public Map<String, Object> capturePayment(final Object orderId, final Map<String, Object> captureData, int attemptNumber) throws Exception {
+		Helper.isNotNull(captureData);
 		Helper.isNotNull(orderId);
 		logger.info("CAPTURING PAYMENT");
 		try {
-			final Object response = CapturePayment.capturePayment(sdkClass, orderId);
+			final Map<String, Object> bodyMap = CapturePayment.createBody(captureData);
+			if (bodyMap.isEmpty()) {
+				return null;
+			}
+			final Object response = CapturePayment.capturePayment(sdkClass, bodyMap, orderId);
 			if (response == null) {
 				return null;
 			}
@@ -323,7 +338,7 @@ public class PlugintSDK {
 					if (attemptNumber <= maxRetry) {
 						logger.info("Retrying again due to timeout exception");
 						attemptNumber++;
-						return capturePayment(orderId, attemptNumber);
+						return capturePayment(orderId, captureData, attemptNumber);
 					} else {
 						throw e;
 					}
@@ -342,25 +357,22 @@ public class PlugintSDK {
 
 	/**
 	 * This method is basically called in constructor method to set authentication
-	 * parameters in header for each API call. UserName and password are fetch from
+	 * parameters in header for each API call. UserName and password and version are fetch from
 	 * merchantConfig.ini
 	 * 
 	 * sdkClass is global param which sets the value API class to be called from SDK
 	 * layer from [ApiClass] section of mappingAPIConfig.ini
 	 *
 	 */
-	public static void doAuthentication() {
+	public static void doAuthentication(String userName, String password, String endPointUrl, String version) {
 		try {
 			BasicConfigurator.configure();
+			Configuration.getDefaultApiClient().setBasePath(endPointUrl);
 			final ApiClient defaultClient = Configuration.getDefaultApiClient();
+			defaultClient.addDefaultHeader(PlugintConstants.OPENPAY_VERSION, version);
 			// Configure HTTP basic authorization: Basic auth
 			final HttpBasicAuth basicAuth = (HttpBasicAuth) defaultClient.getAuthentication("Basic auth");
-			final Wini configFile = ControllerIni.loadPropertyFile(PlugintConstants.CONFIG_FILE);
-			final String userName = Helper.loadPropertyValue(configFile, PlugintConstants.USER,
-					PlugintConstants.AUTHENTICATION);
 			basicAuth.setUsername(userName);
-			final String password = Helper.loadPropertyValue(configFile, PlugintConstants.PASSWORD,
-					PlugintConstants.AUTHENTICATION);
 			basicAuth.setPassword(password);
 			final String sdkClassString = Helper.loadPropertyValue(Helper.loadApiConfigFile(),
 					PlugintConstants.API_CLASS_KEY, PlugintConstants.API_CLASS_SECTION);

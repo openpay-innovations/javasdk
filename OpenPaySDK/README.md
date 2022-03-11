@@ -72,3 +72,5 @@ Add this dependency to your project's POM for SDK integration (for maven based p
 4. For positive test 'testOrderPositive.txt' file will be automatically written with order id during successful create new order api call.
 
 5. Retry count for api is currently set to 3 in mappingApiConfig.ini with property as retryCount.
+
+6. Download latest chromeDriver from link https://chromedriver.storage.googleapis.com/index.html?path=98.0.4758.102/ and add latest chromedriver to /driver folder and update config value chromeDriverFileName in file mappingConfig.ini

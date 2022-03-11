@@ -26,6 +26,7 @@ public class PlugintConstants {
 	public static final String ARRAY_STRING = "array";
 	public static final String ORDERS_METHOD = "orderMethod";
 	public static final String CAPTURE_PAYMENT_METHOD = "capturePaymentMethod";
+	public static final String CAPTURE_PAYMENT_PARAMETER = "capturePaymentRequestParameterType";
 	public static final String CAPTURE_PAYMENT_REQUEST_MODEL = "capturePaymentRequestModel";
 	public static final String GET_ORDERS_REQUEST_MODEL = "getOrdersRequestModel";
 	public static final String CHROMEDRIVER = "ChromeDriverTimeout";
@@ -38,5 +39,5 @@ public class PlugintConstants {
 	public static final String APIRETRYSECTION = "APIRetry";
 	public static final String APIRETRYVALUE = "retryCount";
 	public static final String CREATE_ORDER_PRICE_FORMATTING_SECTION = "CreateOrderPriceFormatting";
-	
+	public static final String OPENPAY_VERSION = "openpay-version";
 }
